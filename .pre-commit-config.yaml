@@ -1,0 +1,33 @@
+repos:
+  # UV auto-sync
+  - repo: local
+    hooks:
+      - id: uv-sync
+        name: Ensure environment synced with uv
+        entry: uv
+        args: [ "sync", "--frozen" ]
+        language: system
+        types: [ file ]
+        files: "^pyproject\\.toml$|^uv\\.lock$"
+        pass_filenames: false
+
+  # UV lock sync
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.15
+    hooks:
+      - id: uv-lock
+
+  # Ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.3
+    hooks:
+      - id: ruff
+      - id: ruff-format
+
+  # Basic housekeeping
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace

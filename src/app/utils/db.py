@@ -1,0 +1,19 @@
+import json
+from typing import Generator, AsyncGenerator
+
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from .config.settings import settings
+
+# SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{settings.DATABASE_HOST_NAME}:{settings.DATABASE_PORT}/{settings.DATABASE_NAME}'
+
+# engine = create_async_engine(SQLALCHEMY_DATABASE_URL)
+
+# SessionLocal = async_sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=engine)
+
+
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        await db.close()

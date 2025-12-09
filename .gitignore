@@ -1,0 +1,78 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cython / compiled extensions
+*.so
+*.pyd
+*.dll
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# VSCode settings (optional, but common)
+.vscode/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# JetBrains IDEs (PyCharm, IntelliJ, etc.)
+.idea/
+
+# PyInstaller
+*.spec
+dist/
+build/
+
+# mypy, pytest, coverage, and other tooling
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.cache/
+
+# InMemory databases
+db/
+*.db
+# Logs
+logs/
+*.log
+
+# dotenv / secret configs
+*.env
+*.env.*
+!.env.example
+
+# Test & coverage outputs
+.tox/
+.nox/
+coverage.xml
+nosetests.xml
+test-results.xml
+
+# pipenv & poetry
+Pipfile.lock
+poetry.lock
+
+# pyproject build artifacts
+*.egg-info/
+*.egg
+*.manifest
+*.dist-info/
+.eggs/
+
+# Wheels
+*.whl
+
+# macOS / Windows / Linux system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Jupyter runtime
+~/.local/share/jupyter/runtime/
