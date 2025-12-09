@@ -25,11 +25,11 @@ packages = ["src/pipeline"]
 
 
 [tool.ruff]
-line-length = 88
+line-length = 120
 indent-width = 4
-target-version = "py314"
+target-version = "py313"
 
-select = ["E", "F", "W", "I"]
+lint.select = ["E", "F", "W", "I"]
 fix = true
 
 [tool.ruff.format]

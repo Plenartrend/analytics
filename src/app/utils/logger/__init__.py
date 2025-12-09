@@ -3,11 +3,11 @@ import logging.config
 import logging.handlers
 import queue
 
+from ..config.settings import settings
 from .handler import (
     get_file_handler,
     get_stdout_handler,
 )
-from ..config.settings import settings
 
 
 def setup_logging():
@@ -17,11 +17,7 @@ def setup_logging():
     root_logger = logging.getLogger()
     root_logger.setLevel(int(settings.LOGGER_DEFAULT_LOG_LEVEL))
 
-    hdlrs = [
-        hdlr
-        for hdlr in [get_stdout_handler(), get_file_handler()]
-        if hdlr is not None
-    ]
+    hdlrs = [hdlr for hdlr in [get_stdout_handler(), get_file_handler()] if hdlr is not None]
     listener = logging.handlers.QueueListener(que, *hdlrs, respect_handler_level=True)
     listener.start()
 

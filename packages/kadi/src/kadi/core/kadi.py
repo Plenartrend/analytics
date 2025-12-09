@@ -10,7 +10,8 @@ from ..dclasses import Event
 
 LOGGER = logging.getLogger("kadi")
 
-def dispatch_event(routes: dict[str: Callable]):
+
+def dispatch_event(routes: dict[str:Callable]):
     async def wrapper(message: Any):
         to_object = Event.from_dict(json.loads(message))
         LOGGER.log(logging.INFO, f"Request to {to_object.event}")
@@ -74,6 +75,7 @@ class Kadi:
                 finally:
                     if "on_close" in lifecycles:
                         await lifecycles["on_close"]()
+
 
 def close():
     raise _KadiCloseException

@@ -2,12 +2,14 @@ import asyncio
 from logging import Logger
 
 from annotations.logger import inject_logger
-from app.utils.config.settings import settings
 from kadi import Kadi, KadiConfig, Lifecycle
-from app.utils.logger import setup_logging
+
 from app.routes.analyse_route import router
+from app.utils.config.settings import settings
+from app.utils.logger import setup_logging
 
 lifecycle = Lifecycle()
+
 
 @lifecycle.on_open()
 @inject_logger
@@ -22,13 +24,13 @@ async def main(logger: Logger = None):
     await Kadi(
         config=KadiConfig(
             settings={
-                'bootstrap.servers': settings.KAFKA_BROKER,
-                'group.id': 'test-group',
-                'auto.offset.reset': 'earliest'
+                "bootstrap.servers": settings.KAFKA_BROKER,
+                "group.id": "test-group",
+                "auto.offset.reset": "earliest",
             },
             topics=[settings.TOPIC],
             routes=[router],
-            lifecycle=[lifecycle]
+            lifecycle=[lifecycle],
         )
     ).run()
 

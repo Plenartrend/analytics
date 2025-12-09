@@ -2,9 +2,10 @@ import inspect
 from typing import Any
 
 from pipeline.pipeline.step import Step
-from app.schema.schema import FormatterConfig
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
 from pipeline.types.result import Err, Result
+
+from app.schema.schema import FormatterConfig
 
 
 class Formatter(Step):
@@ -33,10 +34,7 @@ class Formatter(Step):
                 self.config.formatter_function(input_data.unwrap()), pipeline_config
             )
 
-        if (
-            len(inspect.signature(self.config.formatter_function).parameters) == 2
-            and self.config.store_key is not None
-        ):
+        if len(inspect.signature(self.config.formatter_function).parameters) == 2 and self.config.store_key is not None:
             return_value = await pipeline_config.next(
                 self.config.formatter_function(
                     input_data.unwrap(),

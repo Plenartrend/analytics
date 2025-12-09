@@ -1,6 +1,6 @@
-from .annotations import Router, Lifecycle
-from .core.kadi import Kadi
+from .annotations import Lifecycle, Router
 from .config.config import KadiConfig
+from .core.kadi import Kadi
 
 __all__ = [
     "Router",

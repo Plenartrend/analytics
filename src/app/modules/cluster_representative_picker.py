@@ -2,8 +2,9 @@ from typing import Any
 
 import torch
 from pipeline.pipeline.step import Step
-from pipeline.types.result import Result, Ok
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
+from pipeline.types.result import Ok, Result
+
 
 class ClusterRepresentativePicker(Step):
     def __init__(self, *, config: None):
@@ -21,13 +22,15 @@ class ClusterRepresentativePicker(Step):
         representatives = {}
         unique_labels = set(labels)
         for label in unique_labels:
-            idxs = [i for i, l in enumerate(labels) if l == label]
+            idxs = [i for i, el in enumerate(labels) if el == label]
             if len(idxs) == 1:
                 representatives[label] = topics[idxs[0]]
             else:
                 cluster_emb = embeddings[idxs]
                 centroid = cluster_emb.mean(axis=0)
-                distances = torch.nn.functional.cosine_similarity(torch.from_numpy(cluster_emb), torch.from_numpy(centroid))
+                distances = torch.nn.functional.cosine_similarity(
+                    torch.from_numpy(cluster_emb), torch.from_numpy(centroid)
+                )
                 best_idx = idxs[distances.argmax().item()]
                 representatives[label] = topics[best_idx]
 

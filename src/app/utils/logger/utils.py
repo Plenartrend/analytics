@@ -48,10 +48,7 @@ class SimpleFormatter(logging.Formatter):
         logging.INFO: green + fmt[: (fmt.find("]") + 1)] + reset + fmt[(fmt.find("]") + 1) :],
         logging.WARNING: yellow + fmt[: (fmt.find("]") + 1)] + reset + fmt[(fmt.find("]") + 1) :],
         logging.ERROR: red + fmt[: (fmt.find("]") + 1)] + reset + fmt[(fmt.find("]") + 1) :],
-        logging.CRITICAL: bold_red
-        + fmt[: (fmt.find("]") + 1)]
-        + reset
-        + fmt[(fmt.find("]") + 1) :],
+        logging.CRITICAL: bold_red + fmt[: (fmt.find("]") + 1)] + reset + fmt[(fmt.find("]") + 1) :],
     }
 
     @override
@@ -93,11 +90,7 @@ class MyJSONFormatter(logging.Formatter):
             always_fields["stack_info"] = self.formatStack(record.stack_info)
 
         message = {
-            key: (
-                msg_val
-                if (msg_val := always_fields.pop(val, None)) is not None
-                else getattr(record, val)
-            )
+            key: (msg_val if (msg_val := always_fields.pop(val, None)) is not None else getattr(record, val))
             for key, val in self.fmt_keys.items()
         }
         message.update(always_fields)

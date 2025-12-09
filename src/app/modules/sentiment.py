@@ -3,13 +3,12 @@ from typing import Any
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-
-from app.utils.config.settings import settings
 from pipeline.pipeline.step import Step
-from pipeline.types.result import Result, Ok
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
+from pipeline.types.result import Ok, Result
 
-from app.schema.schema import StanceResult, ClassifiedSpeech
+from app.schema.schema import ClassifiedSpeech, StanceResult
+from app.utils.config.settings import settings
 
 
 class Sentiment(Step):
@@ -67,7 +66,7 @@ class Sentiment(Step):
         "{speech_text}"
         """,
             input_variables=["speech_text", "topic"],
-            partial_variables={"format_instructions": parser.get_format_instructions()}
+            partial_variables={"format_instructions": parser.get_format_instructions()},
         )
 
         llm = ChatOpenAI(
@@ -81,10 +80,7 @@ class Sentiment(Step):
         stance_list = []
 
         for topic in speech.topics:
-            prompt = stance_prompt.format_prompt(
-                speech_text=speech.text,
-                topic=topic
-            ).to_messages()
+            prompt = stance_prompt.format_prompt(speech_text=speech.text, topic=topic).to_messages()
 
             llm_result = llm.invoke(prompt)
             parsed: StanceResult = StanceResult(**parser.parse(llm_result.content))

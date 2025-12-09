@@ -1,12 +1,16 @@
 from typing import Any
-from app.modules.formatter import Formatter
-from app.modules.sentiment import Sentiment
-from app.schema.schema import FormatterConfig, ClassifiedSpeech, SentimentClassifiedSpeech
 
 from pipeline.pipeline import Pipeline, SubPipeline
-
 from pipeline.schemas.schema import PipelineConfig
-from pipeline.types import Result, Ok, Err
+from pipeline.types import Err, Ok, Result
+
+from app.modules.formatter import Formatter
+from app.modules.sentiment import Sentiment
+from app.schema.schema import (
+    ClassifiedSpeech,
+    FormatterConfig,
+    SentimentClassifiedSpeech,
+)
 
 
 async def run_sentiment_analysis_pipeline(speeches: list[ClassifiedSpeech]):
@@ -23,7 +27,7 @@ async def run_sentiment_analysis_pipeline(speeches: list[ClassifiedSpeech]):
                 speaker=unwrapped_speech["speaker"],
                 topics=unwrapped_speech["topics"],
                 text=unwrapped_speech["text"],
-                sentiment=unwrapped_speech["sentiment"]
+                sentiment=unwrapped_speech["sentiment"],
             )
 
             res.append(scs)
@@ -31,14 +35,9 @@ async def run_sentiment_analysis_pipeline(speeches: list[ClassifiedSpeech]):
 
     pipeline = (
         Pipeline.init(input_data=speeches, pipeline_config=PipelineConfig(name="Sentiment Analysis Pipeline"))
-        .parallel(
-            SubPipeline.init()
-            .exec(
-                Sentiment(config=None)
-            )
-        ).exec(
-            Formatter(config=FormatterConfig(formatter_function=formatter_final))
-        ).compile()
+        .parallel(SubPipeline.init().exec(Sentiment(config=None)))
+        .exec(Formatter(config=FormatterConfig(formatter_function=formatter_final)))
+        .compile()
     )
 
     return (await pipeline).unwrap()

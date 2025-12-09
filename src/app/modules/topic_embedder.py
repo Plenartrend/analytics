@@ -1,9 +1,9 @@
 from typing import Any
 
-from sentence_transformers import SentenceTransformer
 from pipeline.pipeline.step import Step
-from pipeline.types.result import Result, Ok
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
+from pipeline.types.result import Ok, Result
+from sentence_transformers import SentenceTransformer
 
 from app.schema.schema import TopicEmbedderConfig
 

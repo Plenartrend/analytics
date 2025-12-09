@@ -1,8 +1,8 @@
-from datetime import datetime
 import gzip
 import os
 import shutil
 import sys
+from datetime import datetime
 from logging import Handler, StreamHandler
 from logging.handlers import RotatingFileHandler
 from typing import Optional
@@ -14,7 +14,6 @@ from .utils import MyJSONFormatter, SimpleFormatter
 
 
 class GzippingRotatingFileHandler(RotatingFileHandler):
-
     def __init__(
         self,
         filename: str,
@@ -40,8 +39,7 @@ class GzippingRotatingFileHandler(RotatingFileHandler):
 
         if should_compress:
             rotated_filename += ".gz"
-            with open(self.baseFilename, "rb") as source_file, \
-                 gzip.open(rotated_filename, "wb") as gzipped_file:
+            with open(self.baseFilename, "rb") as source_file, gzip.open(rotated_filename, "wb") as gzipped_file:
                 shutil.copyfileobj(source_file, gzipped_file)
             os.remove(self.baseFilename)
         else:
@@ -69,10 +67,7 @@ def get_file_handler() -> Optional[Handler]:
     log_dir = str(settings.LOGGER_FILE_LOG_PATH)
     os.makedirs(log_dir, exist_ok=True)
 
-    log_filename = os.path.join(
-        log_dir,
-        f"{datetime.today():%Y%m%d}_PID_{os.getpid()}.jsonl"
-    )
+    log_filename = os.path.join(log_dir, f"{datetime.today():%Y%m%d}_PID_{os.getpid()}.jsonl")
 
     file_handler = GzippingRotatingFileHandler(
         filename=log_filename,

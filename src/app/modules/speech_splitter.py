@@ -1,9 +1,9 @@
 from typing import Any
 
-from pipeline.pipeline.step import Step
-from pipeline.types.result import Result, Ok
-from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pipeline.pipeline.step import Step
+from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
+from pipeline.types.result import Ok, Result
 
 from app.schema.schema import SpeechSplitterConfig
 

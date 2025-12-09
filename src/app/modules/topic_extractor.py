@@ -1,13 +1,15 @@
 from typing import Any
 
-from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from pipeline.pipeline.step import Step
-from pipeline.types.result import Result, Ok
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
+from pipeline.types.result import Ok, Result
+
 from app.schema.schema import TopicForRequest
 from app.utils.config.settings import settings
+
 
 class TopicExtractor(Step):
     def __init__(self, *, config: None):
@@ -22,9 +24,10 @@ class TopicExtractor(Step):
 
         parser = JsonOutputParser(pydantic_object=TopicForRequest)
         prompt = PromptTemplate(
-            template="Return the main topic of the following text in 1-3 words in German. {format_instruction}\n{query}\n{previous_topics}",
+            template="Return the main topic of the following text in 1-3 words in German. "
+            "{format_instruction}\n{query}\n{previous_topics}",
             input_variables=["query", "previous_topics"],
-            partial_variables={"format_instruction": parser.get_format_instructions()}
+            partial_variables={"format_instruction": parser.get_format_instructions()},
         )
 
         llm = ChatOpenAI(
@@ -37,10 +40,7 @@ class TopicExtractor(Step):
 
         topics = []
         for chunk in chunks:
-            formatted_prompt = prompt.format_prompt(
-                query=chunk,
-                previous_topics=", ".join(topics)
-            ).to_messages()
+            formatted_prompt = prompt.format_prompt(query=chunk, previous_topics=", ".join(topics)).to_messages()
             response = llm.invoke(formatted_prompt)
             topic = parser.parse(response.content)["topic"]
             topics.append(topic)

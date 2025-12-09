@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field
-from typing import List, Any, Callable, Optional
+from typing import Any, Callable, List, Optional
 
 from pipeline.schemas.schema import Config
 from pipeline.types import Result
+from pydantic import BaseModel, Field
 
 
 class Speech(BaseModel):
@@ -46,12 +46,10 @@ class TopicEmbedderConfig(Config):
 
 
 class ClusterTopicsConfig(Config):
-    eps: float = 0.3,
+    eps: float = (0.3,)
     min_samples: int = 1
 
 
 class FormatterConfig(Config):
-    formatter_function: (
-            Callable[[Any], Result[Any, Any]] | Callable[[Any, Any], Result[Any, Any]]
-    )
+    formatter_function: Callable[[Any], Result[Any, Any]] | Callable[[Any, Any], Result[Any, Any]]
     store_key: Optional[str] = None

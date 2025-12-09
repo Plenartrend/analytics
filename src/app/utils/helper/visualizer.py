@@ -3,13 +3,14 @@ from matplotlib import pyplot as plt
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
+
 def build_speech_graph(speeches, min_similarity=0.35):
     G = nx.Graph()
 
     for idx, sp in enumerate(speeches):
         G.add_node(idx, topics=sp.topics, text_preview=sp.text[:250])
 
-    speeches_text = [f"{"; ".join(sp.topics)} | {sp.text}" for sp in speeches]
+    speeches_text = [f"{'; '.join(sp.topics)} | {sp.text}" for sp in speeches]
 
     model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
     embeddings = model.encode(speeches_text)

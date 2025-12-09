@@ -1,7 +1,8 @@
 import logging
 from functools import wraps
 
-def log_params(cls):    # noqa
+
+def log_params(cls):  # noqa
     original_method = getattr(cls, "get_pipeline", None)
     if original_method is None:
         return cls
@@ -16,13 +17,15 @@ def log_params(cls):    # noqa
     setattr(cls, "get_pipeline", wrapped_method)
     return cls
 
+
 def inject_logger(func):
     logger_name = f"{func.__module__}.{func.__qualname__}"
     logger = logging.getLogger(logger_name)
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if 'logger' not in kwargs:
-            kwargs['logger'] = logger
+        if "logger" not in kwargs:
+            kwargs["logger"] = logger
         return func(*args, **kwargs)
+
     return wrapper
