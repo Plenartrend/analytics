@@ -9,7 +9,7 @@ ENV UV_COMPILE_BYTECODE=1
 COPY packages/ packages/
 RUN cd packages/podi && uv build --package podi
 RUN cd packages/pipeline && uv build --package pipeline
-RUN cd packages/pipeline && uv build --package hashrr
+RUN cd packages/hashrr && uv build --package hashrr
 
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
