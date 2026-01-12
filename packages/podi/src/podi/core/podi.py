@@ -1,6 +1,7 @@
 import asyncio
 import inspect
 import logging
+import traceback
 from typing import Any, Callable, List
 
 from sqlalchemy import exists, func, or_, select, text
@@ -63,11 +64,11 @@ class Podi:
                 if "on_open" in lifecycles:
                     await lifecycles["on_open"]()
                     try:
-                        key, len, hasharr_id = await self.state.distributed_key_function()
+                        key, length, hasharr_id = await self.state.distributed_key_function()
                         stmt = (
                             select(Activity)
                             .where(
-                                Activity.id % len == key,
+                                Activity.id % length == key,
                                 or_(
                                     ~exists().where(Activity.id == ActivityLatch.activity_id),
                                     exists().where(
@@ -94,7 +95,7 @@ class Podi:
                             await asyncio.sleep(0.3)
                             continue
 
-                        if activity.document_type == "printedPaper":
+                        if activity.document_type == "printedPaper" or len(activity.text) < 50:
                             # set to finish
                             latch = ActivityLatch(
                                 activity_id=activity.id, hasharr_instance_id=hasharr_id, latch="FINISHED"
@@ -120,6 +121,8 @@ class Podi:
                         if "on_error" in lifecycles:
                             await lifecycles["on_error"](e)
                         else:
+                            # print stacktrace
+                            traceback.print_exc()
                             LOGGER.error(f"Error processing message: {e}")
                     finally:
                         if "on_close" in lifecycles:
