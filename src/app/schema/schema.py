@@ -1,8 +1,9 @@
-from typing import Any, Callable, List, Optional
+from typing import Any, AsyncGenerator, Awaitable, Callable, Optional
 
 from pipeline.schemas.schema import Config
 from pipeline.types import Result
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class Speech(BaseModel):
@@ -12,8 +13,8 @@ class Speech(BaseModel):
 
 
 class BundestagProtocol(BaseModel):
-    title: str
-    speeches: List[Speech]
+    id: int
+    speech: str
 
 
 class TopicForRequest(BaseModel):
@@ -25,10 +26,15 @@ class StanceResult(BaseModel):
     explanation: str
 
 
+class Topic(BaseModel):
+    id: int
+    name: str
+    embedding: Any
+
+
 class ClassifiedSpeech(BaseModel):
     id: int
-    speaker: str
-    topics: list[str]
+    topics: list[Topic]
     text: str
 
 
@@ -43,6 +49,7 @@ class SpeechSplitterConfig(Config):
 
 class TopicEmbedderConfig(Config):
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
+    persist_embeddings_global: bool = False
 
 
 class ClusterTopicsConfig(Config):
@@ -53,3 +60,8 @@ class ClusterTopicsConfig(Config):
 class FormatterConfig(Config):
     formatter_function: Callable[[Any], Result[Any, Any]] | Callable[[Any, Any], Result[Any, Any]]
     store_key: Optional[str] = None
+
+
+class State(BaseModel):
+    db_session: Callable[[], AsyncGenerator[AsyncSession, None]]
+    distributed_key_function: Optional[Callable[[Any], Awaitable[int]]]

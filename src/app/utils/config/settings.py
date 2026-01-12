@@ -3,10 +3,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv(find_dotenv())
 
+
 class Settings(BaseSettings):
     # Kafka
     KAFKA_BROKER: str
     TOPIC: str
+
+    # Database
+    DATABASE_USER: str
+    DATABASE_PASSWORD: str
+    DATABASE_HOST_NAME: str
+    DATABASE_PORT: int
+    DATABASE_NAME: str
     # Settings for the logger
     LOGGER_DEFAULT_LOG_LEVEL: int = 20
 
@@ -25,5 +33,6 @@ class Settings(BaseSettings):
     DEEPSEEK_API_KEY: str
 
     model_config = SettingsConfigDict(case_sensitive=False)
+
 
 settings = Settings()  # noqa

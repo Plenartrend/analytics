@@ -1,7 +1,7 @@
 [project]
-name = "kadi"
+name = "podi"
 version = "0.1.0"
-description = "Mega tolles Framework für Kafka that dispatches the event to the correct functions."
+description = "Mega tolles Framework für Postgres that dispatches the event to the correct functions."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -10,7 +10,8 @@ dependencies = [
     "alembic>=1.11.1",
     "pydantic>=2.7.6",
     "pydantic-settings>=2.2.1",
-    "confluent-kafka>=2.4.0"
+    "pydantic>=2.7.6",
+    "pydantic-settings>=2.2.1",
 ]
 
 [dependency-groups]

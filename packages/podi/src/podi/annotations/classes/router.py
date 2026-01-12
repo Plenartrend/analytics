@@ -4,6 +4,7 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
+
 class Router:
     def __init__(self):
         self._store = {}
@@ -15,9 +16,11 @@ class Router:
             sig = inspect.signature(func)
             param_names = list(sig.parameters.keys())
 
-            if not func.__annotations__ or (
-                    'return' in func.__annotations__ and (len(func.__annotations__) - 1) != len(param_names)) or (
-                    'return' not in func.__annotations__ and len(func.__annotations__) != len(param_names)):
+            if (
+                not func.__annotations__
+                or ("return" in func.__annotations__ and (len(func.__annotations__) - 1) != len(param_names))
+                or ("return" not in func.__annotations__ and len(func.__annotations__) != len(param_names))
+            ):
                 self._store[event] = func
                 return func
 

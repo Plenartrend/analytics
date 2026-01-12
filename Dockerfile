@@ -7,14 +7,16 @@ ENV UV_COMPILE_BYTECODE=1
 
 # Build sub-dependencies
 COPY packages/ packages/
-RUN cd packages/kadi && uv build --package kadi
+RUN cd packages/podi && uv build --package podi
 RUN cd packages/pipeline && uv build --package pipeline
+RUN cd packages/pipeline && uv build --package hashrr
 
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
 
-RUN uv pip install /app/packages/kadi/dist/kadi-*.whl
+RUN uv pip install /app/packages/podi/dist/podi-*.whl
 RUN uv pip install /app/packages/pipeline/dist/pipeline-*.whl
+RUN uv pip install /app/packages/hashrr/dist/hashrr-*.whl
 
 # Runner stage
 FROM python:3.14-slim AS runner

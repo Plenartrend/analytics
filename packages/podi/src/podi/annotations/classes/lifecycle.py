@@ -2,7 +2,6 @@ from typing import Callable, Type
 
 
 class Lifecycle:
-
     def __init__(self):
         self._store = {}
 
@@ -24,10 +23,10 @@ class Lifecycle:
         def decorator(func):
             if "on_error" in self._store:
                 current_handler = self._store["on_error"]
-                self._store["on_error"] = \
+                self._store["on_error"] = (
                     lambda error: current_handler(error) if isinstance(error, exception) else func(error)
+                )
             else:
-                self._store["on_error"] = \
-                    lambda error: func(error) if isinstance(error) else None
+                self._store["on_error"] = lambda error: func(error) if isinstance(error) else None
 
         return decorator

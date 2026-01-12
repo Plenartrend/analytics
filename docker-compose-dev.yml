@@ -1,26 +1,10 @@
-version: "3.9"
 services:
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    hostname: kafka
-    container_name: kafka
-    ports:
-      - "9092:9092"
-      - "9093:9093"
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: postgres
     environment:
-      KAFKA_HEAP_OPTS: "-Xmx512M -Xms256M"
-      KAFKA_KRAFT_MODE: "true"  # Enables KRaft mode.
-      KAFKA_PROCESS_ROLES: controller,broker  # Kafka acts as both controller and broker.
-      KAFKA_NODE_ID: 1  # Unique ID for the Kafka instance.
-      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"  # Controller quorum.
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_LOG_DIRS: /var/lib/kafka/data  # Log storage location.
-      KAFKA_CREATE_TOPICS: "queue:1:1"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1  # Single replica for simplicity.
-      KAFKA_LOG_RETENTION_HOURS: 168  # Log retention period (7 days).
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0  # No rebalance delay.
-      CLUSTER_ID: "Mk3OEYBSD34fcwNTJENDM2Qk"  # Unique Kafka cluster ID
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: analytics
+    ports:
+      - "5432:5432"

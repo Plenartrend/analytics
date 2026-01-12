@@ -1,22 +1,28 @@
+import logging
+import traceback
 from pprint import pprint
 
-from kadi import Router
+from podi import Router
 
+from app.repositories import activity_mapping_repository
 from app.schema import BundestagProtocol
 from app.services import sentiment_service, topic_service
-from app.utils.helper.visualizer import generate_speech_graph
+
+LOGGER = logging.getLogger("analyse_route")
 
 router = Router()
 
 
 @router.route("analyseEvent")
 async def analyse_event(protocol: BundestagProtocol):
-    speeches = protocol.speeches
+    try:
+        topic_classified_speech = await topic_service.run_topic_analysis_pipeline(protocol.id, protocol.speech)
+        topic_classified_stance_speech = await sentiment_service.run_sentiment_analysis_pipeline(
+            topic_classified_speech
+        )
+        await activity_mapping_repository.insert(topic_classified_stance_speech)
+        pprint(topic_classified_stance_speech.model_dump(), width=120)
 
-    topic_classified_speeches = await topic_service.run_topic_analysis_pipeline(speeches)
-    topic_classified_stance_speeches = await sentiment_service.run_sentiment_analysis_pipeline(
-        topic_classified_speeches
-    )
-    pprint([a.model_dump() for a in topic_classified_stance_speeches], width=120)
-
-    generate_speech_graph(topic_classified_stance_speeches, 0.4)
+    except Exception as e:
+        traceback.print_exc()
+        LOGGER.error(f"Error during analysis: {e}")

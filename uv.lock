@@ -5,8 +5,9 @@ requires-python = ">=3.14"
 [manifest]
 members = [
     "analytics",
-    "kadi",
+    "hashrr",
     "pipeline",
+    "podi",
 ]
 
 [[package]]
@@ -31,13 +32,15 @@ dependencies = [
     { name = "alembic" },
     { name = "asyncpg" },
     { name = "confluent-kafka" },
-    { name = "kadi" },
+    { name = "hashrr" },
     { name = "langchain" },
     { name = "langchain-openai" },
     { name = "langchain-text-splitters" },
     { name = "matplotlib" },
     { name = "openai" },
+    { name = "pgvector" },
     { name = "pipeline" },
+    { name = "podi" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "scikit-learn" },
@@ -59,13 +62,15 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.11.1" },
     { name = "asyncpg", specifier = ">=0.31.0" },
     { name = "confluent-kafka", specifier = ">=2.4.0" },
-    { name = "kadi", editable = "packages/kadi" },
+    { name = "hashrr", editable = "packages/hashrr" },
     { name = "langchain", specifier = ">=1.1.2" },
     { name = "langchain-openai", specifier = ">=1.1.0" },
     { name = "langchain-text-splitters", specifier = ">=1.0.0" },
     { name = "matplotlib", specifier = ">=3.10.7" },
     { name = "openai", specifier = ">=2.9.0" },
+    { name = "pgvector", specifier = ">=0.4.2" },
     { name = "pipeline", editable = "packages/pipeline" },
+    { name = "podi", editable = "packages/podi" },
     { name = "pydantic", specifier = ">=2.7.6" },
     { name = "pydantic-settings", specifier = ">=2.2.1" },
     { name = "scikit-learn", specifier = ">=1.7.2" },
@@ -326,6 +331,29 @@ wheels = [
 ]
 
 [[package]]
+name = "hashrr"
+version = "0.1.0"
+source = { editable = "packages/hashrr" }
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=1.13.0" },
+    { name = "pre-commit", specifier = ">=4.0.1" },
+    { name = "pytest", specifier = ">=7.4.0" },
+    { name = "ruff", specifier = ">=0.7.3" },
+]
+
+[[package]]
 name = "hf-xet"
 version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -494,45 +522,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6a/0a/eebeb1fa92507ea94016a2a790b93c2ae41a7e18778f85471dc54475ed25/jsonpointer-3.0.0.tar.gz", hash = "sha256:2b2d729f2091522d61c3b31f82e11870f60b68f43fbc705cb76bf4b832af59ef", size = 9114, upload-time = "2024-06-10T19:24:42.462Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/71/92/5e77f98553e9e75130c78900d000368476aed74276eb8ae8796f65f00918/jsonpointer-3.0.0-py2.py3-none-any.whl", hash = "sha256:13e088adc14fca8b6aa8177c044e12701e6ad4b28ff10e65f2267a90109c9942", size = 7595, upload-time = "2024-06-10T19:24:40.698Z" },
-]
-
-[[package]]
-name = "kadi"
-version = "0.1.0"
-source = { editable = "packages/kadi" }
-dependencies = [
-    { name = "alembic" },
-    { name = "asyncpg" },
-    { name = "confluent-kafka" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "alembic", specifier = ">=1.11.1" },
-    { name = "asyncpg", specifier = ">=0.31.0" },
-    { name = "confluent-kafka", specifier = ">=2.4.0" },
-    { name = "pydantic", specifier = ">=2.7.6" },
-    { name = "pydantic-settings", specifier = ">=2.2.1" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.44" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.13.0" },
-    { name = "pre-commit", specifier = ">=4.0.1" },
-    { name = "pytest", specifier = ">=7.4.0" },
-    { name = "ruff", specifier = ">=0.7.3" },
 ]
 
 [[package]]
@@ -1110,6 +1099,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pgvector"
+version = "0.4.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/25/6c/6d8b4b03b958c02fa8687ec6063c49d952a189f8c91ebbe51e877dfab8f7/pgvector-0.4.2.tar.gz", hash = "sha256:322cac0c1dc5d41c9ecf782bd9991b7966685dee3a00bc873631391ed949513a", size = 31354, upload-time = "2025-12-05T01:07:17.87Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5a/26/6cee8a1ce8c43625ec561aff19df07f9776b7525d9002c86bceb3e0ac970/pgvector-0.4.2-py3-none-any.whl", hash = "sha256:549d45f7a18593783d5eec609ea1684a724ba8405c4cb182a0b2b08aeff04e08", size = 27441, upload-time = "2025-12-05T01:07:16.536Z" },
+]
+
+[[package]]
 name = "pillow"
 version = "12.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1185,6 +1186,43 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz", hash = "sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3", size = 69412, upload-time = "2025-05-15T12:30:07.975Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl", hash = "sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746", size = 20538, upload-time = "2025-05-15T12:30:06.134Z" },
+]
+
+[[package]]
+name = "podi"
+version = "0.1.0"
+source = { editable = "packages/podi" }
+dependencies = [
+    { name = "alembic" },
+    { name = "asyncpg" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "alembic", specifier = ">=1.11.1" },
+    { name = "asyncpg", specifier = ">=0.31.0" },
+    { name = "pydantic", specifier = ">=2.7.6" },
+    { name = "pydantic-settings", specifier = ">=2.2.1" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.44" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=1.13.0" },
+    { name = "pre-commit", specifier = ">=4.0.1" },
+    { name = "pytest", specifier = ">=7.4.0" },
+    { name = "ruff", specifier = ">=0.7.3" },
 ]
 
 [[package]]

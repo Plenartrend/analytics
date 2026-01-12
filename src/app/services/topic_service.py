@@ -1,12 +1,10 @@
-from collections import defaultdict
-from typing import Any
-
-from pipeline.pipeline import Pipeline, SubPipeline
+from pipeline.pipeline import Pipeline
 from pipeline.schemas.schema import PipelineConfig
-from pipeline.types import Err, Ok, Result
+from pipeline.types import Ok
 
 from app.modules.cluster_representative_picker import ClusterRepresentativePicker
 from app.modules.cluster_topics import ClusterTopics
+from app.modules.cluster_topics_global import ClusterTopicsGlobal
 from app.modules.formatter import Formatter
 from app.modules.speech_splitter import SpeechSplitter
 from app.modules.topic_embedder import TopicEmbedder
@@ -15,57 +13,27 @@ from app.schema.schema import (
     ClassifiedSpeech,
     ClusterTopicsConfig,
     FormatterConfig,
-    Speech,
     SpeechSplitterConfig,
+    Topic,
     TopicEmbedderConfig,
 )
+from app.utils.db import get_db
 
 
-async def run_topic_analysis_pipeline(text: list[Speech]):
-    def formatter(speeches: list[Result[dict, Any]]):
-        all_topics = []
-        speech_topic_map = []
+async def run_topic_analysis_pipeline(id: int, text: str):
+    def formatter_final(speech):
+        topics = []
 
-        unpacked = []
-        for el in speeches:
-            if el.is_ok():
-                unpacked.append(el.unwrap())
-            else:
-                return Err("Error in subpipeline execution")
+        for topic in speech["cluster_topics"]:
+            topics.append(Topic(id=topic["topic_id"], name=topic["name"], embedding=topic["embedding"]))
 
-        for idx, sp in enumerate(unpacked):
-            for t in sp["topics"]:
-                all_topics.append(t)
-                speech_topic_map.append((idx, t))
-
-        return Ok({"speeches": unpacked, "topics": all_topics, "speech_map": speech_topic_map})
-
-    def formatter_final(speeches):
-        speech_global_topics = defaultdict(set)
-        for (speech_idx, topic), label in zip(speeches["speech_map"], speeches["labels"]):
-            representative = speeches["cluster_reps"][label]
-            speech_global_topics[speech_idx].add(representative)
-
-        global_speeches = []
-        for idx in range(0, len(speeches["speeches"])):
-            global_speeches.append(list(speech_global_topics[idx]))
-
-        speeches_to_pydantic = []
-        for idx, speech in enumerate(speeches["speeches"]):
-            speeches_to_pydantic.append(
-                ClassifiedSpeech(
-                    id=speech["speechnum"], speaker=speech["speaker"], topics=global_speeches[idx], text=speech["text"]
-                )
-            )
+        speeches_to_pydantic = ClassifiedSpeech(id=id, topics=topics, text=text)
 
         return Ok(speeches_to_pydantic)
 
-    pipeline = (
-        Pipeline.init(
-            input_data=[a.model_dump() for a in text], pipeline_config=PipelineConfig(name="Topic Analysis Pipeline")
-        )
-        .parallel(
-            SubPipeline.init()
+    async with get_db() as session:
+        pipeline = (
+            Pipeline.init(input_data={"text": text}, pipeline_config=PipelineConfig(name="Topic Analysis Pipeline"))
             .exec(SpeechSplitter(config=SpeechSplitterConfig()))
             .exec(TopicExtractor(config=None))
             .exec(
@@ -73,13 +41,12 @@ async def run_topic_analysis_pipeline(text: list[Speech]):
             )
             .exec(ClusterTopics(config=ClusterTopicsConfig(eps=0.25, min_samples=1)))
             .exec(ClusterRepresentativePicker(config=None))
+            .exec(
+                TopicEmbedder(config=TopicEmbedderConfig(embedding_model_name="sentence-transformers/all-MiniLM-L6-v2"))
+            )
+            .exec(ClusterTopicsGlobal(config=ClusterTopicsConfig(eps=0.25, min_samples=1), session=session))
+            .exec(Formatter(config=FormatterConfig(formatter_function=formatter_final)))
+            .compile()
         )
-        .exec(Formatter(config=FormatterConfig(formatter_function=formatter)))
-        .exec(TopicEmbedder(config=TopicEmbedderConfig(embedding_model_name="sentence-transformers/all-MiniLM-L6-v2")))
-        .exec(ClusterTopics(config=ClusterTopicsConfig(eps=0.25, min_samples=1)))
-        .exec(ClusterRepresentativePicker(config=None))
-        .exec(Formatter(config=FormatterConfig(formatter_function=formatter_final)))
-        .compile()
-    )
 
     return (await pipeline).unwrap()
