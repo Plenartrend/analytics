@@ -6,8 +6,8 @@ from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
 from pipeline.types.result import Ok, Result
 from sqlalchemy import literal, select
 
-from app.model.model import Topic
-from app.utils.db import get_db
+from ..model.model import Topic
+from ..utils.db import get_db
 
 
 class ClusterTopicsGlobal(Step):

@@ -5,7 +5,7 @@ from pipeline.pipeline.step import Step
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
 from pipeline.types.result import Err, Result
 
-from app.schema.schema import FormatterConfig
+from ..schema.schema import FormatterConfig
 
 
 class Formatter(Step):

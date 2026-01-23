@@ -31,14 +31,13 @@ dev = [
     "ruff>=0.7.3",
     "pytest>=7.4.0"
 ]
+[tool.uv.workspace]
+members = ["packages/*"]
 
 [tool.uv.sources]
 podi = { workspace = true }
 pipeline = { workspace = true }
 hashrr = { workspace = true }
-
-[tool.uv.workspace]
-members = ["packages/*"]
 
 [build-system]
 requires = ["hatchling"]

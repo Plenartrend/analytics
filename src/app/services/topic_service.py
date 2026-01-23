@@ -2,14 +2,14 @@ from pipeline.pipeline import Pipeline
 from pipeline.schemas.schema import PipelineConfig
 from pipeline.types import Ok
 
-from app.modules.cluster_representative_picker import ClusterRepresentativePicker
-from app.modules.cluster_topics import ClusterTopics
-from app.modules.cluster_topics_global import ClusterTopicsGlobal
-from app.modules.formatter import Formatter
-from app.modules.speech_splitter import SpeechSplitter
-from app.modules.topic_embedder import TopicEmbedder
-from app.modules.topic_extractor import TopicExtractor
-from app.schema.schema import (
+from ..modules.cluster_representative_picker import ClusterRepresentativePicker
+from ..modules.cluster_topics import ClusterTopics
+from ..modules.cluster_topics_global import ClusterTopicsGlobal
+from ..modules.formatter import Formatter
+from ..modules.speech_splitter import SpeechSplitter
+from ..modules.topic_embedder import TopicEmbedder
+from ..modules.topic_extractor import TopicExtractor
+from ..schema.schema import (
     ClassifiedSpeech,
     ClusterTopicsConfig,
     FormatterConfig,
@@ -17,7 +17,7 @@ from app.schema.schema import (
     Topic,
     TopicEmbedderConfig,
 )
-from app.utils.db import get_db
+from ..utils.db import get_db
 
 
 async def run_topic_analysis_pipeline(id: int, text: str):

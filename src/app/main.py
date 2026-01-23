@@ -1,16 +1,15 @@
 import asyncio
 from logging import Logger
 
-from annotations.logger import inject_logger
 from hashrr import Hashrr, HashrrConfig
 from podi import Lifecycle, Podi, PodiConfig
 
-from app.repositories import hashrr_repository as hashrr_repo
-from app.routes.analyse_route import router
-from app.schema import schema
-from app.utils.config.settings import settings
-from app.utils.db import get_db
-from app.utils.logger import setup_logging
+from .annotations.logger import inject_logger
+from .repositories import hashrr_repository as hashrr_repo
+from .routes.analyse_route import router
+from .schema import schema
+from .utils.config.settings import settings
+from .utils.db import get_db
 
 lifecycle = Lifecycle()
 
@@ -22,7 +21,7 @@ async def on_open(logger: Logger = None):
 
 
 @inject_logger
-async def main(instance: int, logger: Logger = None):
+async def _main(instance: int, logger: Logger = None):
     logger.info(f"Instance {instance} starting...")
 
     hashrr = Hashrr(
@@ -42,7 +41,6 @@ async def main(instance: int, logger: Logger = None):
     await Podi(
         config=PodiConfig(
             settings=settings,
-            topics=[settings.TOPIC],
         ),
         routes=[router],
         lifecycle=[lifecycle],
@@ -54,12 +52,6 @@ async def main(instance: int, logger: Logger = None):
     logger.info("Application finished")
 
 
-async def run_all():
-    tasks = [asyncio.create_task(main(i)) for i in range(1)]
+async def main():
+    tasks = [asyncio.create_task(_main(i)) for i in range(1)]
     await asyncio.gather(*tasks)
-
-
-asyncio.run(run_all())
-if __name__ == "__main__":
-    setup_logging()
-    asyncio.run(run_all())

@@ -5,7 +5,7 @@ from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
 from pipeline.types.result import Ok, Result
 from sentence_transformers import SentenceTransformer
 
-from app.schema.schema import TopicEmbedderConfig
+from ..schema.schema import TopicEmbedderConfig
 
 
 class TopicEmbedder(Step):

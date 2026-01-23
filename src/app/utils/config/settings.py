@@ -5,14 +5,10 @@ load_dotenv(find_dotenv())
 
 
 class Settings(BaseSettings):
-    # Kafka
-    KAFKA_BROKER: str
-    TOPIC: str
-
     # Database
     DATABASE_USER: str
     DATABASE_PASSWORD: str
-    DATABASE_HOST_NAME: str
+    DATABASE_HOST: str
     DATABASE_PORT: int
     DATABASE_NAME: str
     # Settings for the logger

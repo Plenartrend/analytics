@@ -1,6 +1,6 @@
-from app.model.model import ActivityMapping
-from app.schema.schema import SentimentClassifiedSpeech
-from app.utils.db import get_db
+from ..model.model import ActivityMapping
+from ..schema.schema import SentimentClassifiedSpeech
+from ..utils.db import get_db
 
 
 async def insert(sentiment_classified_speech: SentimentClassifiedSpeech):

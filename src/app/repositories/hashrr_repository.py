@@ -2,8 +2,8 @@ from hashrr.config.config import NodeInfo
 from sqlalchemy import and_, exists, func, select, text
 from sqlalchemy.orm import aliased
 
-from app.model.model import HashrrHeartbeat, HashrrInstance
-from app.utils.db import get_db
+from ..model.model import HashrrHeartbeat, HashrrInstance
+from ..utils.db import get_db
 
 
 async def register_callback():

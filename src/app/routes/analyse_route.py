@@ -4,9 +4,9 @@ from pprint import pprint
 
 from podi import Router
 
-from app.repositories import activity_mapping_repository
-from app.schema import BundestagProtocol
-from app.services import sentiment_service, topic_service
+from ..repositories import activity_mapping_repository
+from ..schema import BundestagProtocol
+from ..services import sentiment_service, topic_service
 
 LOGGER = logging.getLogger("analyse_route")
 

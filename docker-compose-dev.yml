@@ -4,7 +4,29 @@ services:
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: analytics
     ports:
       - "5432:5432"
+  analytics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: analytics
+    environment:
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: analytics
+      LOGGER_DEFAULT_LOG_LEVEL: 20
+      LOGGER_STD_OUT_ENABLE_LOGGING: True
+      LOGGER_STD_OUT_LOG_LEVEL: 20
+      LOGGER_FILE_ENABLE_LOGGING: True
+      LOGGER_FILE_LOG_PATH: "logs"
+      LOGGER_FILE_LOG_LEVEL: 20
+      LOGGER_FILE_BYTE_SIZE: 1000000
+      LOGGER_FILE_COMPRESSION: False
+      LOGGER_HTTP_ENABLE_LOGGING: True
+      LOGGER_HTTP_LOG_LEVEL: 30
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}

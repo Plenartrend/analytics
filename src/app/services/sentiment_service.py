@@ -2,9 +2,9 @@ from pipeline.pipeline import Pipeline
 from pipeline.schemas.schema import PipelineConfig
 from pipeline.types import Ok
 
-from app.modules.formatter import Formatter
-from app.modules.sentiment import Sentiment
-from app.schema.schema import (
+from ..modules.formatter import Formatter
+from ..modules.sentiment import Sentiment
+from ..schema.schema import (
     ClassifiedSpeech,
     FormatterConfig,
     SentimentClassifiedSpeech,

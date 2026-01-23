@@ -5,7 +5,7 @@ from pipeline.pipeline.step import Step
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
 from pipeline.types.result import Ok, Result
 
-from app.schema.schema import SpeechSplitterConfig
+from ..schema.schema import SpeechSplitterConfig
 
 
 class SpeechSplitter(Step):

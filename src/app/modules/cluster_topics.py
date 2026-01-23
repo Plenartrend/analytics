@@ -6,7 +6,7 @@ from pipeline.types.result import Ok, Result
 from sklearn.cluster import DBSCAN
 from sklearn.metrics.pairwise import cosine_distances
 
-from app.schema.schema import ClusterTopicsConfig
+from ..schema.schema import ClusterTopicsConfig
 
 
 class ClusterTopics(Step):

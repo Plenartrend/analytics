@@ -7,8 +7,8 @@ from pipeline.pipeline.step import Step
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
 from pipeline.types.result import Ok, Result
 
-from app.schema.schema import TopicForRequest
-from app.utils.config.settings import settings
+from ..schema.schema import TopicForRequest
+from ..utils.config.settings import settings
 
 
 class TopicExtractor(Step):
