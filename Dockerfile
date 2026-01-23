@@ -1,6 +1,15 @@
 # syntax=docker/dockerfile:1.20
 
-FROM astral/uv:python3.14-bookworm AS builder
+# Da github action schelcht ist, darf ich jetzt uv manuel installieren
+FROM python:3.14-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
+ENV PATH="/root/.local/bin/:$PATH"
 
 WORKDIR /app
 
