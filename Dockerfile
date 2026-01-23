@@ -16,13 +16,22 @@ WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
+
 COPY pyproject.toml uv.lock ./
 
 COPY --parents packages/*/src/*/__init__.py .
 COPY --parents packages/*/pyproject.toml .
 COPY --parents packages/*/README.md .
 
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --no-cache
+
+RUN \
+  rm -rf \
+    /root/.cache \
+    /tmp/* \
+    /app/.venv/share \
+    /app/.venv/lib/python*/site-packages/**/tests \
+    /app/.venv/lib/python*/site-packages/**/__pycache__
 
 FROM python:3.14-slim AS runner
 
