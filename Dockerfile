@@ -1,4 +1,4 @@
-# Builder stage
+# syntax=docker/dockerfile:1.4
 FROM astral/uv:python3.14-bookworm AS builder
 
 WORKDIR /app
