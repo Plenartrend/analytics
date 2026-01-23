@@ -28,8 +28,11 @@ COPY --from=builder --chown=nonroot:nonroot  /app/.venv .venv
 COPY --chown=nonroot:nonroot packages/ packages/
 COPY --chown=nonroot:nonroot src/ src/
 
+COPY --chown=nonroot:nonroot alembic.ini .
+COPY --chown=nonroot:nonroot alembic/ alembic/
+
 USER nonroot
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-CMD ["python", "-m", "src.app"]
+CMD ["sh", "-c", "alembic upgrade head && python -m src.app"]
