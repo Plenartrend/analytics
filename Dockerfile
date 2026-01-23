@@ -1,4 +1,5 @@
-# syntax=docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.20
+
 FROM astral/uv:python3.14-bookworm AS builder
 
 WORKDIR /app
