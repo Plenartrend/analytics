@@ -38,6 +38,14 @@ members = ["packages/*"]
 podi = { workspace = true }
 pipeline = { workspace = true }
 hashrr = { workspace = true }
+torch = [
+    { index = "pytorch-cpu" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [build-system]
 requires = ["hatchling"]
