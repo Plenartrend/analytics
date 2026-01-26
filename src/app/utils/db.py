@@ -2,7 +2,7 @@ import contextlib
 from typing import AsyncGenerator
 
 from pgvector.asyncpg import register_vector
-from sqlalchemy import event, text
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from .config.settings import settings
@@ -17,7 +17,7 @@ SessionLocal = async_sessionmaker(autocommit=False, autoflush=False, expire_on_c
 @contextlib.asynccontextmanager
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     db = SessionLocal()
-    await db.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+    # await db.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
     try:
         yield db
     finally:
