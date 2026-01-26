@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(text("ALTER TABLE plenartrend.topics ADD COLUMN IF NOT EXISTS embedding vector(384)"))
+    op.execute(text("ALTER TABLE topics ADD COLUMN IF NOT EXISTS embedding vector(384)"))
 
     # Themenliste
     topics_list = [
@@ -45,9 +45,9 @@ def upgrade() -> None:
         emb_str = "[" + ",".join(map(str, emb)) + "]"
 
         conn.execute(
-            text(f"INSERT INTO plenartrend.topics (name, embedding) VALUES ('{topic}', '{emb_str}'::vector(384)) "),
+            text(f"INSERT INTO topics (name, embedding) VALUES ('{topic}', '{emb_str}'::vector(384)) "),
         )
 
 
 def downgrade() -> None:
-    op.drop_column("plenartrend.topics", "embedding")
+    op.drop_column("topics", "embedding")
