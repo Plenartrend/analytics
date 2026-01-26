@@ -1,8 +1,6 @@
 import contextlib
 from typing import AsyncGenerator
 
-from pgvector.asyncpg import register_vector
-from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from .config.settings import settings
@@ -22,8 +20,3 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield db
     finally:
         await db.close()
-
-
-@event.listens_for(engine.sync_engine, "connect")
-async def connect(dbapi_connection, connection_record):
-    await register_vector(dbapi_connection)
