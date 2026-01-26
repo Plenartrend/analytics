@@ -41,7 +41,6 @@ DocumentTypeEnum = ENUM(
 
 
 class Topic(Base):
-    __table_args__ = {"schema": "plenartrend"}
     __tablename__ = "topics"
 
     id = Column(Integer, primary_key=True)
@@ -53,7 +52,6 @@ class Topic(Base):
 
 
 class ProcessTopic(Base):
-    __table_args__ = {"schema": "plenartrend"}
     __tablename__ = "process_topics"
 
     process_id = Column(
@@ -73,7 +71,6 @@ class ProcessTopic(Base):
 
 
 class PrintedPaper(Base):
-    __table_args__ = {"schema": "plenartrend"}
     __tablename__ = "printed_papers"
 
     id = Column(Integer, primary_key=True)
@@ -96,7 +93,6 @@ class PrintedPaper(Base):
 
 
 class Activity(Base):
-    __table_args__ = {"schema": "plenartrend"}
     __tablename__ = "activities"
 
     id = Column(Integer, primary_key=True)
