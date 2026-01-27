@@ -173,9 +173,6 @@ class Podi:
                         res = await db.execute(stmt)
                         role: Role = res.scalars().first()
 
-                        print(role.person_id)
-                        print(activity.id)
-
                         stmt = select(Protocol).where(Protocol.id == activity.protocol_id)
 
                         res = await db.execute(stmt)

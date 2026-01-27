@@ -52,7 +52,6 @@ async def analyse_protocol_event(activity: BundestagProtocol, session: AsyncSess
         cnt = await activity_repository.get_activity_cnt_after(activity.person_id, activity.speech_date, session)
 
         if cnt < 20:
-            print(activity.person_id)
             tfidf_matrix = await tf_idf_service.calculate_tf_idf(activity.person_id, activity.speech_date, session)
             await tf_idf_repository.insert_tfidf(activity.person_id, json.dumps(tfidf_matrix), session)
 

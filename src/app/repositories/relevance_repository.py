@@ -10,8 +10,6 @@ async def calculate_relevance(protocol_id: int, transaction: Optional[AsyncSessi
     from sqlalchemy import Float, cast, func, select
     from sqlalchemy.dialects.postgresql import insert
 
-    print("Protocol ID for relevance calculation:", protocol_id)
-
     counts_subq = (
         select(
             Activity.protocol_id.label("protocol_id"),
