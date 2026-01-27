@@ -26,8 +26,8 @@ class HashrrHeartbeat(Base):
 
 
 BodyEnum = ENUM(
-    "bundestag",
-    "bundesrat",
+    "BT",
+    "BR",
     name="body",
     create_type=False,
 )
@@ -115,6 +115,39 @@ class Activity(Base):
     created = Column(DateTime, server_default=func.now())
 
 
+class Role(Base):
+    __tablename__ = "roles"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    name = Column(Text)
+    academic_title = Column(Text)
+
+    last_name = Column(Text, nullable=False)
+    first_name = Column(Text, nullable=False)
+
+    person_id = Column(
+        Integer,
+        ForeignKey("plenartrend.persons.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    group_id = Column(
+        Integer,
+        ForeignKey("plenartrend.parliamentary_groups.id"),
+        nullable=True,
+    )
+
+    election_period = Column(
+        Integer,
+        ForeignKey("plenartrend.election_periods.id"),
+        nullable=True,
+    )
+
+    updated = Column(DateTime)
+    created = Column(DateTime)
+
+
 class ActivityMapping(Base):
     __tablename__ = "activity_mappings"
 
@@ -123,3 +156,18 @@ class ActivityMapping(Base):
     topic_id = Column(Integer, nullable=True)
     sentiment_value = Column(Float, nullable=True)
     sentiment_reason = Column(Text, nullable=True)
+
+
+class ActivityTfidf(Base):
+    __tablename__ = "activity_tfidf"
+
+    person_id = Column(Integer, primary_key=True)
+    tfidf_vector = Column(Text, nullable=False)
+
+
+class ActivityRelevance(Base):
+    __tablename__ = "activity_relevance"
+
+    protocol_id = Column(Integer, primary_key=True)
+    topic_id = Column(Integer, primary_key=True)
+    relevance = Column(Float, nullable=False)

@@ -7,11 +7,11 @@ from pipeline.types.result import Ok, Result
 from sqlalchemy import literal, select
 
 from ..model.model import Topic
-from ..utils.db import get_db
+from ..schema.schema import ClusterTopicsConfig
 
 
 class ClusterTopicsGlobal(Step):
-    def __init__(self, *, config, session):
+    def __init__(self, *, config: ClusterTopicsConfig, session):
         self.config = config
         self.session = session
 
@@ -24,18 +24,21 @@ class ClusterTopicsGlobal(Step):
         output_topics = []
 
         for i, emb in enumerate(input_embeddings):
-            async with get_db() as session:
-                topic_name = input_value["topics"][i]
+            topic_name = input_value["topics"][i]
 
-                stmt = select(Topic).order_by(Topic.embedding.op("<->")(literal(emb.cpu().numpy()))).limit(1)
-                result = await session.execute(stmt)
-                closest_topic = result.scalars().first()
+            stmt = select(Topic).order_by(Topic.embedding.op("<->")(literal(emb.cpu().numpy()))).limit(1)
+            result = await self.session.execute(stmt)
+            closest_topic = result.scalars().first()
 
             distance = np.linalg.norm(closest_topic.embedding - emb.cpu().numpy()) if closest_topic else None
             if closest_topic is None or distance > self.config.eps:
                 new_topic = Topic(name=topic_name, embedding=emb.cpu())
-                session.add(new_topic)
-                await session.commit()
+                self.session.add(new_topic)
+                if self.config.commit:
+                    try:
+                        await self.session.commit()
+                    except Exception:
+                        await self.session.rollback()
                 closest_topic = new_topic
 
             output_topics.append({

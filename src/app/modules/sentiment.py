@@ -82,7 +82,7 @@ class Sentiment(Step):
         for topic in speech.topics:
             prompt = stance_prompt.format_prompt(speech_text=speech.text, topic=topic).to_messages()
 
-            llm_result = llm.invoke(prompt)
+            llm_result = await llm.ainvoke(prompt)
             parsed: StanceResult = StanceResult(**parser.parse(llm_result.content))
 
             parsed.stance = max(min(parsed.stance, 1.0), -1.0)

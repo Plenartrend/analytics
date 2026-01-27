@@ -1,3 +1,4 @@
+import datetime
 from typing import Any, AsyncGenerator, Awaitable, Callable, Optional
 
 from pipeline.schemas.schema import Config
@@ -12,9 +13,18 @@ class Speech(BaseModel):
     text: str
 
 
+class PrintedPaper(BaseModel):
+    id: int
+    title: str
+    text: str
+
+
 class BundestagProtocol(BaseModel):
     id: int
     speech: str
+    person_id: int
+    protocol_id: int
+    speech_date: datetime.datetime
 
 
 class TopicForRequest(BaseModel):
@@ -47,6 +57,10 @@ class SpeechSplitterConfig(Config):
     chunk_overlap: int = 200
 
 
+class TopicExtractorConfig(Config):
+    inject_topics: Optional[list[str]] = None
+
+
 class TopicEmbedderConfig(Config):
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     persist_embeddings_global: bool = False
@@ -55,6 +69,7 @@ class TopicEmbedderConfig(Config):
 class ClusterTopicsConfig(Config):
     eps: float = (0.3,)
     min_samples: int = 1
+    commit: bool = True
 
 
 class FormatterConfig(Config):

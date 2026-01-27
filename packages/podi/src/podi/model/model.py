@@ -26,8 +26,8 @@ class HashrrHeartbeat(Base):
 
 
 BodyEnum = ENUM(
-    "bundestag",
-    "bundesrat",
+    "BT",
+    "BR",
     name="body",
     create_type=False,
 )
@@ -141,3 +141,29 @@ class Activity(Base):
     api_updated = Column(DateTime)
     updated = Column(DateTime)
     created = Column(DateTime, server_default=func.now())
+
+
+class Protocol(Base):
+    __tablename__ = "protocols"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+
+    title = Column(Text, nullable=False)
+    document_number = Column(Text, nullable=False)
+
+    publisher = Column(BodyEnum, nullable=True)
+
+    session_note = Column(Text)
+    url = Column(Text)
+    text = Column(Text)
+
+    election_period = Column(
+        Integer,
+        ForeignKey("plenartrend.election_periods.number"),
+        nullable=True,
+    )
+
+    date = Column(TIMESTAMP)
+    api_updated = Column(TIMESTAMP)
+    updated = Column(TIMESTAMP)
+    created = Column(TIMESTAMP)
