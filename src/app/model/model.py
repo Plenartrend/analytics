@@ -121,7 +121,8 @@ class Role(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     name = Column(Text)
-    academic_title = Column(Text)
+    title = Column(Text)
+    name_suffix = Column(Text)
 
     last_name = Column(Text, nullable=False)
     first_name = Column(Text, nullable=False)
