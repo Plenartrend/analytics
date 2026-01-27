@@ -4,14 +4,13 @@ import logging
 import traceback
 from typing import Any, AsyncGenerator, Callable, List
 
-from app.model.model import Role
 from sqlalchemy import and_, exists, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import Lifecycle, Router
 from ..config.config import PodiConfig
 from ..dclasses import Event
-from ..model.model import Activity, ActivityLatch, HashrrHeartbeat, HashrrInstance, PrintedPaper, Protocol
+from ..model.model import Activity, ActivityLatch, HashrrHeartbeat, HashrrInstance, PrintedPaper, Protocol, Role
 from ..utils.db import get_db_generator
 
 LOGGER = logging.getLogger("podi")
