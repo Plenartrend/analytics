@@ -95,7 +95,7 @@ class Podi:
                             ),
                         )
                         .order_by(Activity.created.asc())
-                    )
+                    ).with_for_update(skip_locked=True)
 
                     res = await db.execute(stmt)
 
