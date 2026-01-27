@@ -69,33 +69,63 @@ class Podi:
                 async with get_db() as db:
                     db: AsyncSession
                     key, length, hasharr_id = await self.state.distributed_key_function()
+
+                    activity_latch_exists = exists(
+                        select(1).select_from(ActivityLatch).where(ActivityLatch.activity_id == Activity.id)
+                    ).correlate(Activity)
+
+                    activity_latch_null_instance_exists = exists(
+                        select(1)
+                        .select_from(ActivityLatch)
+                        .where(
+                            ActivityLatch.activity_id == Activity.id,
+                            ActivityLatch.hasharr_instance_id.is_(None),
+                        )
+                    ).correlate(Activity)
+
+                    working_with_fresh_heartbeat_exists = exists(
+                        select(1)
+                        .select_from(ActivityLatch)
+                        .join(
+                            HashrrInstance,
+                            ActivityLatch.hasharr_instance_id == HashrrInstance.id,
+                        )
+                        .join(
+                            HashrrHeartbeat,
+                            HashrrHeartbeat.hashrr_instance_id == HashrrInstance.id,
+                        )
+                        .where(
+                            ActivityLatch.activity_id == Activity.id,
+                            ActivityLatch.latch == "WORKING",
+                            HashrrHeartbeat.heartbeat >= func.now() - text("INTERVAL '30 seconds'"),
+                        )
+                    ).correlate(Activity)
+
+                    finished_latch_exists = exists(
+                        select(1)
+                        .select_from(ActivityLatch)
+                        .where(
+                            ActivityLatch.activity_id == Activity.id,
+                            ActivityLatch.latch == "FINISHED",
+                        )
+                    ).correlate(Activity)
+
                     stmt = (
                         select(Activity)
                         .where(
                             Activity.id % length == key,
                             or_(
-                                ~exists().where(Activity.id == ActivityLatch.activity_id),
-                                exists().where(
-                                    Activity.id == ActivityLatch.activity_id,
-                                    ActivityLatch.hasharr_instance_id is None,
-                                ),
+                                ~activity_latch_exists,
+                                activity_latch_null_instance_exists,
                                 and_(
-                                    exists().where(
-                                        Activity.id == ActivityLatch.activity_id,
-                                        ActivityLatch.hasharr_instance_id == HashrrInstance.id,
-                                        HashrrInstance.id == HashrrHeartbeat.hashrr_instance_id,
-                                        ActivityLatch.latch == "WORKING",
-                                        HashrrHeartbeat.heartbeat >= func.now() - text("INTERVAL '30 seconds'"),
-                                    ),
-                                    ~exists().where(
-                                        Activity.id == ActivityLatch.activity_id,
-                                        ActivityLatch.latch == "FINISHED",
-                                    ),
+                                    working_with_fresh_heartbeat_exists,
+                                    ~finished_latch_exists,
                                 ),
                             ),
                         )
                         .order_by(Activity.created.asc())
-                    ).with_for_update(skip_locked=True)
+                        .with_for_update(skip_locked=True)
+                    )
 
                     res = await db.execute(stmt)
 
