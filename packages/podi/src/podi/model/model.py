@@ -167,3 +167,36 @@ class Protocol(Base):
     api_updated = Column(TIMESTAMP)
     updated = Column(TIMESTAMP)
     created = Column(TIMESTAMP)
+
+
+class Role(Base):
+    __tablename__ = "roles"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    name = Column(Text)
+    academic_title = Column(Text)
+
+    last_name = Column(Text, nullable=False)
+    first_name = Column(Text, nullable=False)
+
+    person_id = Column(
+        Integer,
+        ForeignKey("plenartrend.persons.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    group_id = Column(
+        Integer,
+        ForeignKey("plenartrend.parliamentary_groups.id"),
+        nullable=True,
+    )
+
+    election_period = Column(
+        Integer,
+        ForeignKey("plenartrend.election_periods.id"),
+        nullable=True,
+    )
+
+    updated = Column(DateTime)
+    created = Column(DateTime)
