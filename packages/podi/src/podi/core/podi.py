@@ -240,6 +240,7 @@ class Podi:
 
                         res = await db.execute(stmt)
                         activities: list[Activity] = list(res.scalars().all())
+                        activity_ids: list[int] = [act.id for act in activities]
 
                         for act in activities:
                             stmt = (
@@ -281,8 +282,8 @@ class Podi:
                                 await db.get_transaction().rollback()
 
                             transaction = await db.begin()
-                            for act in activities:
-                                stmt = delete(ActivityLatch).where(ActivityLatch.activity_id == act.id)
+                            for id in activity_ids:
+                                stmt = delete(ActivityLatch).where(ActivityLatch.activity_id == id)
                                 await db.execute(stmt)
 
                             await transaction.commit()
@@ -301,6 +302,8 @@ class Podi:
                                 },
                             )
                         )
+
+                        activity_id = activity.id
 
                         await db.execute(stmt)
                         await transaction.commit()
@@ -324,9 +327,8 @@ class Podi:
                                 await db.get_transaction().rollback()
 
                             transaction = await db.begin()
-                            for act in activities:
-                                stmt = delete(ActivityLatch).where(ActivityLatch.activity_id == act.id)
-                                await db.execute(stmt)
+                            stmt = delete(ActivityLatch).where(ActivityLatch.activity_id == activity_id)
+                            await db.execute(stmt)
 
                             await transaction.commit()
                     else:
