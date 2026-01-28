@@ -103,7 +103,7 @@ async def run_topic_analysis_printed_paper_pipeline(
             Pipeline.init(
                 input_data={"text": text}, pipeline_config=PipelineConfig(name="Printed Paper Topic Analysis Pipeline")
             )
-            .exec(SpeechSplitter(config=SpeechSplitterConfig(chunk_size=10000, chunk_overlap=200)))
+            .exec(SpeechSplitter(config=SpeechSplitterConfig(chunk_size=20000, chunk_overlap=200)))
             .exec(TopicExtractor(config=TopicExtractorConfig(inject_topics=[title])))
             .exec(
                 TopicEmbedder(config=TopicEmbedderConfig(embedding_model_name="sentence-transformers/all-MiniLM-L6-v2"))
