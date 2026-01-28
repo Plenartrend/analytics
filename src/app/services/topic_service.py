@@ -31,6 +31,15 @@ async def run_topic_analysis_protocol_pipeline(id: int, text: str, transaction: 
         for topic in speech["cluster_topics"]:
             topics.append(Topic(id=topic["topic_id"], name=topic["name"], embedding=topic["embedding"]))
 
+        dup_removal = []
+        topic_ids = set()
+        for topic in topics:
+            if topic.id not in topic_ids:
+                dup_removal.append(topic)
+                topic_ids.add(topic.id)
+
+        topics = dup_removal
+
         speeches_to_pydantic = ClassifiedSpeech(id=id, topics=topics, text=text)
 
         return Ok(speeches_to_pydantic)
@@ -72,6 +81,15 @@ async def run_topic_analysis_printed_paper_pipeline(
 
         for topic in speech["cluster_topics"]:
             topics.append(Topic(id=topic["topic_id"], name=topic["name"], embedding=topic["embedding"]))
+
+        dup_removal = []
+        topic_ids = set()
+        for topic in topics:
+            if topic.id not in topic_ids:
+                dup_removal.append(topic)
+                topic_ids.add(topic.id)
+
+        topics = dup_removal
 
         speeches_to_pydantic = ClassifiedSpeech(id=id, topics=topics, text=text)
 
