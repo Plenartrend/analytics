@@ -62,7 +62,9 @@ async def run_topic_analysis_protocol_pipeline(id: int, text: str, transaction: 
             .exec(
                 TopicEmbedder(config=TopicEmbedderConfig(embedding_model_name="sentence-transformers/all-MiniLM-L6-v2"))
             )
-            .exec(ClusterTopicsGlobal(config=ClusterTopicsConfig(eps=0.25, min_samples=1), session=session))
+            .exec(
+                ClusterTopicsGlobal(config=ClusterTopicsConfig(eps=0.25, min_samples=1, commit=False), session=session)
+            )
             .exec(Formatter(config=FormatterConfig(formatter_function=formatter_final)))
             .compile()
         )
@@ -113,7 +115,9 @@ async def run_topic_analysis_printed_paper_pipeline(
             .exec(
                 TopicEmbedder(config=TopicEmbedderConfig(embedding_model_name="sentence-transformers/all-MiniLM-L6-v2"))
             )
-            .exec(ClusterTopicsGlobal(config=ClusterTopicsConfig(eps=0.5, min_samples=1), session=session))
+            .exec(
+                ClusterTopicsGlobal(config=ClusterTopicsConfig(eps=0.5, min_samples=1, commit=False), session=session)
+            )
             .exec(Formatter(config=FormatterConfig(formatter_function=formatter_final)))
             .compile()
         )
