@@ -172,3 +172,13 @@ class ActivityRelevance(Base):
     protocol_id = Column(Integer, primary_key=True)
     topic_id = Column(Integer, primary_key=True)
     relevance = Column(Float, nullable=False)
+
+
+class PrintedPaperMapping(Base):
+    __tablename__ = "printed_paper_mappings"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    printed_paper_id = Column(Integer, nullable=False)
+    topic_id = Column(Integer, nullable=True)
+    sentiment_value = Column(Float, nullable=True)
+    sentiment_reason = Column(Text, nullable=True)
