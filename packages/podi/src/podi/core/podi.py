@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import inspect
 import logging
 import traceback
@@ -50,7 +51,7 @@ def collect_lifecycle(lifecycle_list: List[Lifecycle]):
     return lifecycle
 
 
-async def find_activites_stmt(key, length) -> GenerativeSelect:
+async def find_activites_stmt(key, length, settings) -> GenerativeSelect:
     outer_activity_alias = aliased(Activity)
 
     activity_latch_exists = exists(
@@ -97,24 +98,25 @@ async def find_activites_stmt(key, length) -> GenerativeSelect:
         select(1)
         .select_from(Activity)
         .outerjoin(PrintedPaper, PrintedPaper.id == Activity.printed_paper_id)
+        .outerjoin(Protocol, Protocol.id == Activity.protocol_id)
         .where(
             or_(
-                # protocol case
                 and_(
                     Activity.id == outer_activity_alias.id,
                     Activity.document_type == "protocol",
                     Activity.text.isnot(None),
                     Activity.text != "",
                     Activity.text != "[NoTextAvailable]",
+                    Protocol.date >= datetime.datetime.fromisoformat(settings.PROCESS_START_DATE).date(),
                     func.length(Activity.text) > 1000,
                 ),
-                # printedPaper case
                 and_(
-                    Activity.id == outer_activity_alias.id,  # correlate to outer row
+                    Activity.id == outer_activity_alias.id,
                     Activity.document_type == "printedPaper",
                     PrintedPaper.text.isnot(None),
                     PrintedPaper.text != "",
                     PrintedPaper.text != "[NoTextAvailable]",
+                    PrintedPaper.date >= datetime.datetime.fromisoformat(settings.PROCESS_START_DATE).date(),
                     func.length(PrintedPaper.text) > 1000,
                 ),
             )
@@ -223,7 +225,7 @@ class Podi:
                     db: AsyncSession
                     key, length, hasharr_id = await self.state.distributed_key_function()
 
-                    stmt = await find_activites_stmt(key, length)
+                    stmt = await find_activites_stmt(key, length, self.config.settings)
 
                     transaction = await db.begin()
 

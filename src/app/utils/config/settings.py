@@ -28,6 +28,8 @@ class Settings(BaseSettings):
 
     DEEPSEEK_API_KEY: str
 
+    PROCESS_START_DATE: str = "2020-08-01T00:00:00+00:00"
+
     model_config = SettingsConfigDict(case_sensitive=False)
 
 
