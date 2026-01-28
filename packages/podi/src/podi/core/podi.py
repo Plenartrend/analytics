@@ -4,7 +4,8 @@ import logging
 import traceback
 from typing import Any, AsyncGenerator, Callable, List
 
-from sqlalchemy import and_, exists, func, or_, select, text
+from sqlalchemy import exists, func, or_, select, text, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import Lifecycle, Router
@@ -113,36 +114,65 @@ class Podi:
                         select(Activity)
                         .where(
                             Activity.id % length == key,
+                            ~finished_latch_exists,
                             or_(
                                 ~activity_latch_exists,
                                 activity_latch_null_instance_exists,
-                                and_(
-                                    working_with_fresh_heartbeat_exists,
-                                    ~finished_latch_exists,
-                                ),
+                                working_with_fresh_heartbeat_exists,
                             ),
                         )
                         .order_by(Activity.created.asc())
-                        .with_for_update(skip_locked=True)
                     )
+
+                    transaction = await db.begin()
 
                     res = await db.execute(stmt)
 
                     activity: Activity = res.scalars().first()
 
                     if activity is None:
+                        await transaction.commit()
                         await asyncio.sleep(0.3)
 
                     elif len(activity.text) < 50:
                         LOGGER.log(logging.WARNING, f"Activity {activity.id} text too short, skipping analysis.")
 
-                        latch = ActivityLatch(activity_id=activity.id, hasharr_instance_id=hasharr_id, latch="FINISHED")
-                        db.add(latch)
+                        stmt = (
+                            insert(ActivityLatch)
+                            .values(
+                                activity_id=activity.id,
+                                hasharr_instance_id=hasharr_id,
+                                latch="FINISHED",
+                            )
+                            .on_conflict_do_update(
+                                index_elements=[ActivityLatch.activity_id],
+                                set_={
+                                    "hasharr_instance_id": hasharr_id,
+                                    "latch": "FINISHED",
+                                },
+                            )
+                        )
+
+                        await db.execute(stmt)
+                        await transaction.commit()
 
                     elif activity.document_type == "printedPaper":
-                        latch = ActivityLatch(activity_id=activity.id, hasharr_instance_id=hasharr_id)
-                        db.add(latch)
-                        await db.commit()
+                        stmt = (
+                            insert(ActivityLatch)
+                            .values(
+                                activity_id=activity.id,
+                                hasharr_instance_id=hasharr_id,
+                            )
+                            .on_conflict_do_update(
+                                index_elements=[ActivityLatch.activity_id],
+                                set_={
+                                    "hasharr_instance_id": hasharr_id,
+                                },
+                            )
+                        )
+
+                        await db.execute(stmt)
+                        await transaction.commit()
 
                         stmt = select(PrintedPaper).where(PrintedPaper.id == activity.printed_paper_id)
 
@@ -159,13 +189,35 @@ class Podi:
 
                         await dispatch_event(routes)(event_type, db, self.state)
 
-                        latch = ActivityLatch(activity_id=activity.id, hasharr_instance_id=hasharr_id, latch="FINISHED")
-                        db.add(latch)
+                        stmt = (
+                            update(ActivityLatch)
+                            .where(ActivityLatch.activity_id == activity.id)
+                            .values(
+                                hasharr_instance_id=hasharr_id,
+                                latch="FINISHED",
+                            )
+                        )
+
+                        await db.execute(stmt)
+                        await db.commit()
 
                     elif activity.document_type == "protocol":
-                        latch = ActivityLatch(activity_id=activity.id, hasharr_instance_id=hasharr_id)
-                        db.add(latch)
-                        await db.commit()
+                        stmt = (
+                            insert(ActivityLatch)
+                            .values(
+                                activity_id=activity.id,
+                                hasharr_instance_id=hasharr_id,
+                            )
+                            .on_conflict_do_update(
+                                index_elements=[ActivityLatch.activity_id],
+                                set_={
+                                    "hasharr_instance_id": hasharr_id,
+                                },
+                            )
+                        )
+
+                        await db.execute(stmt)
+                        await transaction.commit()
 
                         stmt = select(Role).where(Role.id == activity.role_id)
 
@@ -192,10 +244,19 @@ class Podi:
 
                         await dispatch_event(routes)(event_type, db, self.state)
 
-                        latch = ActivityLatch(activity_id=activity.id, hasharr_instance_id=hasharr_id, latch="FINISHED")
-                        db.add(latch)
+                        stmt = (
+                            update(ActivityLatch)
+                            .where(ActivityLatch.activity_id == activity.id)
+                            .values(
+                                hasharr_instance_id=hasharr_id,
+                                latch="FINISHED",
+                            )
+                        )
 
-                    await db.commit()
+                        await db.execute(stmt)
+                        await db.commit()
+                    else:
+                        await transaction.commit()
                 continue
 
             except Exception as e:
