@@ -7,7 +7,7 @@ from typing import Any, AsyncGenerator, Callable, List
 
 from sqlalchemy import GenerativeSelect, and_, delete, exists, func, or_, select, text, update
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncSessionTransaction
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 
 from .. import Lifecycle, Router
@@ -127,6 +127,7 @@ async def find_activites_stmt(key, length, settings) -> GenerativeSelect:
         select(outer_activity_alias)
         .where(
             outer_activity_alias.id % length == key,
+            outer_activity_alias.document_type != "printedPaper",
             ~finished_latch_exists,
             text_is_long_enough,
             or_(
@@ -140,9 +141,7 @@ async def find_activites_stmt(key, length, settings) -> GenerativeSelect:
     return stmt
 
 
-async def dispatch_to_protocols(
-    state, activity: Activity, db: AsyncSession, routes: dict[Any, Any]
-) -> AsyncSessionTransaction:
+async def dispatch_to_protocols(activity: Activity, db: AsyncSession):
     stmt = select(Role).where(Role.id == activity.role_id)
 
     res = await db.execute(stmt)
@@ -168,15 +167,10 @@ async def dispatch_to_protocols(
 
     await db.commit()
 
-    transaction = await db.begin()
-
-    await dispatch_event(routes)(event_type, db, state)
-    return transaction
+    return event_type
 
 
-async def dispatch_to_printed_papers(
-    state, activities: list[Activity], activity: Activity, db: AsyncSession, routes: dict[Any, Any]
-) -> AsyncSessionTransaction:
+async def dispatch_to_printed_papers(activities: list[Activity], activity: Activity, db: AsyncSession):
     stmt = select(PrintedPaper).where(PrintedPaper.id == activity.printed_paper_id)
 
     res = await db.execute(stmt)
@@ -197,11 +191,7 @@ async def dispatch_to_printed_papers(
 
     await db.commit()
 
-    transaction = await db.begin()
-
-    await dispatch_event(routes)(event_type, db, state)
-
-    return transaction
+    return event_type
 
 
 class Podi:
@@ -244,6 +234,7 @@ class Podi:
                         activities: list[Activity] = list(res.scalars().all())
                         activity_ids: list[int] = [act.id for act in activities]
 
+                        promises = []
                         for act in activities:
                             stmt = (
                                 insert(ActivityLatch)
@@ -259,36 +250,36 @@ class Podi:
                                 )
                             )
 
-                            await db.execute(stmt)
+                            promises.append(db.execute(stmt))
 
+                        await asyncio.gather(*promises)
                         await transaction.commit()
 
                         try:
-                            transaction = await dispatch_to_printed_papers(self.state, activities, activity, db, routes)
+                            async with db.begin():
+                                event_type = await dispatch_to_printed_papers(activities, activity, db)
 
-                            for act in activities:
-                                stmt = (
-                                    update(ActivityLatch)
-                                    .where(ActivityLatch.activity_id == act.id)
-                                    .values(
-                                        hasharr_instance_id=hasharr_id,
-                                        latch="FINISHED",
+                                await dispatch_event(routes)(event_type, db, self.state)
+
+                                for act in activities:
+                                    stmt = (
+                                        update(ActivityLatch)
+                                        .where(ActivityLatch.activity_id == act.id)
+                                        .values(
+                                            hasharr_instance_id=hasharr_id,
+                                            latch="FINISHED",
+                                        )
                                     )
-                                )
-                                await db.execute(stmt)
-
-                            await transaction.commit()
+                                    await db.execute(stmt)
 
                         except Exception:
-                            if db.in_transaction():
-                                await db.get_transaction().rollback()
+                            async with db.begin():
+                                promises = []
+                                for id in activity_ids:
+                                    stmt = delete(ActivityLatch).where(ActivityLatch.activity_id == id)
+                                    promises.append(db.execute(stmt))
 
-                            transaction = await db.begin()
-                            for id in activity_ids:
-                                stmt = delete(ActivityLatch).where(ActivityLatch.activity_id == id)
-                                await db.execute(stmt)
-
-                            await transaction.commit()
+                                await asyncio.gather(*promises)
 
                     elif activity.document_type == "protocol":
                         stmt = (
@@ -310,29 +301,26 @@ class Podi:
                         await db.execute(stmt)
                         await transaction.commit()
 
-                        transaction = await dispatch_to_protocols(self.state, activity, db, routes)
+                        event_type = await dispatch_to_protocols(activity, db)
 
                         try:
-                            stmt = (
-                                update(ActivityLatch)
-                                .where(ActivityLatch.activity_id == activity.id)
-                                .values(
-                                    hasharr_instance_id=hasharr_id,
-                                    latch="FINISHED",
+                            async with db.begin():
+                                await dispatch_event(routes)(event_type, db, self.state)
+
+                                stmt = (
+                                    update(ActivityLatch)
+                                    .where(ActivityLatch.activity_id == activity.id)
+                                    .values(
+                                        hasharr_instance_id=hasharr_id,
+                                        latch="FINISHED",
+                                    )
                                 )
-                            )
 
-                            await db.execute(stmt)
-                            await transaction.commit()
+                                await db.execute(stmt)
                         except Exception:
-                            if db.in_transaction():
-                                await db.get_transaction().rollback()
-
-                            transaction = await db.begin()
-                            stmt = delete(ActivityLatch).where(ActivityLatch.activity_id == activity_id)
-                            await db.execute(stmt)
-
-                            await transaction.commit()
+                            async with db.begin():
+                                stmt = delete(ActivityLatch).where(ActivityLatch.activity_id == activity_id)
+                                await db.execute(stmt)
                     else:
                         await transaction.commit()
 
