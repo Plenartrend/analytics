@@ -15,6 +15,7 @@ class Speech(BaseModel):
 
 class PrintedPaper(BaseModel):
     id: int
+    activity_ids: list[int]
     title: str
     text: str
 

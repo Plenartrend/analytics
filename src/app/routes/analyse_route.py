@@ -5,9 +5,15 @@ import traceback
 from podi import Router
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..model.model import PrintedPaper
-from ..repositories import activity_mapping_repository, activity_repository, relevance_repository, tf_idf_repository
+from ..repositories import (
+    activity_mapping_repository,
+    activity_repository,
+    printed_papers_mapping_repository,
+    relevance_repository,
+    tf_idf_repository,
+)
 from ..schema import BundestagProtocol
+from ..schema.schema import PrintedPaper
 from ..services import sentiment_service, tf_idf_service, topic_service
 
 LOGGER = logging.getLogger("analyse_route")
@@ -25,9 +31,7 @@ async def analyse_printed_paper_event(protocol: PrintedPaper, session: AsyncSess
             topic_classified_speech
         )
 
-        await activity_mapping_repository.insert(topic_classified_stance_speech, session)
-
-        await relevance_repository.calculate_relevance(protocol.id, session)
+        await printed_papers_mapping_repository.insert(topic_classified_stance_speech, session)
 
     except Exception as e:
         traceback.print_exc()
@@ -47,7 +51,7 @@ async def analyse_protocol_event(activity: BundestagProtocol, session: AsyncSess
 
         await activity_mapping_repository.insert(topic_classified_stance_speech, session)
 
-        await relevance_repository.calculate_relevance(activity.protocol_id, session)
+        await relevance_repository.calculate_relevance_for_activity(activity.protocol_id, session)
 
         cnt = await activity_repository.get_activity_cnt_after(activity.person_id, activity.speech_date, session)
 

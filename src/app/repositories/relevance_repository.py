@@ -6,7 +6,7 @@ from ..model.model import Activity, ActivityMapping, ActivityRelevance
 from ..utils.db import get_db
 
 
-async def calculate_relevance(protocol_id: int, transaction: Optional[AsyncSession] = None):
+async def calculate_relevance_for_activity(protocol_id: int, transaction: Optional[AsyncSession] = None):
     from sqlalchemy import Float, cast, func, select
     from sqlalchemy.dialects.postgresql import insert
 
