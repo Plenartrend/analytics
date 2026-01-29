@@ -80,7 +80,7 @@ async def find_activites_stmt(key, length, settings) -> GenerativeSelect:
                     ~a1.text.in_(["", "[NoTextAvailable]"]),
                     prot.date >= datetime.datetime.fromisoformat(settings.PROCESS_START_DATE).date(),
                     func.length(a1.text) > 1000,
-                    func.length(pp.text) < 100000,
+                    func.length(a1.text) < 100000,
                 ),
                 and_(
                     a1.document_type == "printedPaper",
