@@ -324,6 +324,8 @@ class Podi:
                     else:
                         await transaction.commit()
 
+                LOGGER.log("INFO", "Cycle complete, checking for new activities...")
+
             except Exception as e:
                 if isinstance(e, _KadiCloseException):
                     if "on_close" in lifecycles:
