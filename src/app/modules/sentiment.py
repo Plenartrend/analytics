@@ -26,9 +26,11 @@ class Sentiment(Step):
         stance_prompt = PromptTemplate(
             template="""
         Evaluate the stance of the following text toward the topic "{topic}".
-        If the topic is for example Pendlerpauschale (commuter allowance) and the text supports paying the
-        Pendlerpauschale, return a positive value.
-        If the text opposes it, return a negative value.
+        Depending on the topic, you either rate the speakers opinion regarding the topic, or the current way of h
+        andling the topic. For example a speach regarding the "Pendlerpauschale" will very likely either be for paying
+        out a pendlerpauschale, or against it. On the other hand a speech regarding the "Ausgabenverteilung" can't
+        really be for or against an Ausgabenverteilung, but for or against the CURRENT Ausgabenverteilung.
+        You must judge which makes more sense for the given topic.
 
         Return a numerical value in the range [-1, 1]:
 
