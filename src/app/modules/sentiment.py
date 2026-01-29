@@ -26,6 +26,9 @@ class Sentiment(Step):
         stance_prompt = PromptTemplate(
             template="""
         Evaluate the stance of the following text toward the topic "{topic}".
+        If the topic is for example Pendlerpauschale (commuter allowance) and the text supports paying the
+        Pendlerpauschale, return a positive value.
+        If the text opposes it, return a negative value.
 
         Return a numerical value in the range [-1, 1]:
 
@@ -59,6 +62,8 @@ class Sentiment(Step):
                 "Ich verurteile dies.",
                 "Ich lehne es völlig ab.",
             ]
+
+        Please keep the explanation brief (1-2 sentences) and focus on the numerical stance value.
 
         {format_instructions}
 
