@@ -88,7 +88,6 @@ async def find_activites_stmt(key, length, settings) -> GenerativeSelect:
                     ~pp.text.in_(["", "[NoTextAvailable]"]),
                     pp.date >= datetime.datetime.fromisoformat(settings.PROCESS_START_DATE).date(),
                     func.length(pp.text) > 1000,
-                    func.length(pp.text) < 100000,
                 ),
             ),
             # Latch and Heartbeat logic
