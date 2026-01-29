@@ -5,7 +5,7 @@ import logging
 import traceback
 from typing import Any, AsyncGenerator, Callable, List
 
-from sqlalchemy import GenerativeSelect, and_, delete, exists, func, or_, select, text, update
+from sqlalchemy import GenerativeSelect, and_, delete, func, or_, select, text, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
@@ -52,92 +52,53 @@ def collect_lifecycle(lifecycle_list: List[Lifecycle]):
 
 
 async def find_activites_stmt(key, length, settings) -> GenerativeSelect:
-    outer_activity_alias = aliased(Activity)
-
-    activity_latch_exists = exists(
-        select(1).select_from(ActivityLatch).where(ActivityLatch.activity_id == outer_activity_alias.id)
-    ).correlate(Activity)
-
-    activity_latch_null_instance_exists = exists(
-        select(1)
-        .select_from(ActivityLatch)
-        .where(
-            ActivityLatch.activity_id == outer_activity_alias.id,
-            ActivityLatch.hasharr_instance_id.is_(None),
-        )
-    ).correlate(Activity)
-
-    working_with_fresh_heartbeat_exists = exists(
-        select(1)
-        .select_from(ActivityLatch)
-        .join(
-            HashrrInstance,
-            ActivityLatch.hasharr_instance_id == HashrrInstance.id,
-        )
-        .join(
-            HashrrHeartbeat,
-            HashrrHeartbeat.hashrr_instance_id == HashrrInstance.id,
-        )
-        .where(
-            ActivityLatch.activity_id == outer_activity_alias.id,
-            ActivityLatch.latch == "WORKING",
-            HashrrHeartbeat.heartbeat >= func.now() - text("INTERVAL '30 seconds'"),
-        )
-    )
-
-    finished_latch_exists = exists(
-        select(1)
-        .select_from(ActivityLatch)
-        .where(
-            ActivityLatch.activity_id == outer_activity_alias.id,
-            ActivityLatch.latch == "FINISHED",
-        )
-    )
-
-    text_is_long_enough = exists(
-        select(1)
-        .select_from(Activity)
-        .outerjoin(PrintedPaper, PrintedPaper.id == Activity.printed_paper_id)
-        .outerjoin(Protocol, Protocol.id == Activity.protocol_id)
-        .where(
-            or_(
-                and_(
-                    Activity.id == outer_activity_alias.id,
-                    Activity.document_type == "protocol",
-                    Activity.text.isnot(None),
-                    Activity.text != "",
-                    Activity.text != "[NoTextAvailable]",
-                    Protocol.date >= datetime.datetime.fromisoformat(settings.PROCESS_START_DATE).date(),
-                    func.length(Activity.text) > 1000,
-                ),
-                and_(
-                    Activity.id == outer_activity_alias.id,
-                    Activity.document_type == "printedPaper",
-                    PrintedPaper.text.isnot(None),
-                    PrintedPaper.text != "",
-                    PrintedPaper.text != "[NoTextAvailable]",
-                    PrintedPaper.date >= datetime.datetime.fromisoformat(settings.PROCESS_START_DATE).date(),
-                    func.length(PrintedPaper.text) > 1000,
-                ),
-            )
-        )
-    )
+    a1 = Activity
+    finished_latch = aliased(ActivityLatch)
+    al = aliased(ActivityLatch)
+    hi = aliased(HashrrInstance)
+    hb = aliased(HashrrHeartbeat)
+    pp = aliased(PrintedPaper)
+    prot = aliased(Protocol)
 
     stmt = (
-        select(outer_activity_alias)
+        select(a1)
+        .distinct()
+        .outerjoin(finished_latch, and_(finished_latch.activity_id == a1.id, finished_latch.latch == "FINISHED"))
+        .outerjoin(pp, pp.id == a1.printed_paper_id)
+        .outerjoin(prot, prot.id == a1.protocol_id)
+        .outerjoin(al, al.activity_id == a1.id)
+        .outerjoin(hi, al.hasharr_instance_id == hi.id)
+        .outerjoin(hb, hb.hashrr_instance_id == hi.id)
         .where(
-            outer_activity_alias.id % length == key,
-            outer_activity_alias.document_type != "printedPaper",
-            ~finished_latch_exists,
-            text_is_long_enough,
+            a1.id % length == key,
+            a1.document_type != "printedPaper",
+            finished_latch.id.is_(None),
             or_(
-                ~activity_latch_exists,
-                activity_latch_null_instance_exists,
-                working_with_fresh_heartbeat_exists,
+                and_(
+                    a1.document_type == "protocol",
+                    a1.text.is_not(None),
+                    ~a1.text.in_(["", "[NoTextAvailable]"]),
+                    prot.date >= datetime.datetime.fromisoformat(settings.PROCESS_START_DATE).date(),
+                    func.length(a1.text) > 1000,
+                ),
+                and_(
+                    a1.document_type == "printedPaper",
+                    pp.text.is_not(None),
+                    ~pp.text.in_(["", "[NoTextAvailable]"]),
+                    pp.date >= datetime.datetime.fromisoformat(settings.PROCESS_START_DATE).date(),
+                    func.length(pp.text) > 1000,
+                ),
+            ),
+            # Latch and Heartbeat logic
+            or_(
+                al.id.is_(None),
+                al.hasharr_instance_id.is_(None),
+                and_(al.latch == "WORKING", hb.heartbeat >= (func.now() - text("INTERVAL '30 seconds'"))),
             ),
         )
-        .order_by(outer_activity_alias.created)
     )
+
+    print(stmt)
     return stmt
 
 
