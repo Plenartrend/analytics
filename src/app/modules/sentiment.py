@@ -25,20 +25,24 @@ class Sentiment(Step):
 
         stance_prompt = PromptTemplate(
             template="""
-        Evaluate the stance of the following text toward the topic "{topic}".
+        Evaluate the stance of the following speech toward the topic "{topic}".
         For each topic, decide whether to evaluate the speaker’s opinion about the topic itself or the speaker’s opinion
         about the current way the topic is handled.
 
         Default: Rate the speaker’s stance on the topic itself (for vs. against), interpreting intent where needed.
-        Example: If a speaker says it is too hard to do an Ehrenamt at the moment, this counts
-        as a positive opinion toward Ehrenamt. The text might be critical of the current situation,
-        but the speaker is still “for” Ehrenamt in general.
+        Example: If a speaker says it is too hard to do an 'Ehrenamt' at the moment, this counts
+        as a positive opinion toward 'Ehrenamt'. The text might be critical of the current situation,
+        but the speaker is still “for” 'Ehrenamt' in general.
 
         Exception: If being “for” or “against” the topic itself does not make sense, rate the stance
         toward the current implementation or distribution instead.
 
-        Example: For Ausgabenverteilung, evaluate whether the speaker supports or criticizes the current
-        Ausgabenverteilung, not the concept in general.
+        Example: For 'Ausgabenverteilung', evaluate whether the speaker supports or criticizes the current
+        'Ausgabenverteilung', not the concept in general.
+
+        It can sometimes happen that you get multiple speeches. Then you must only analyse the first speech,
+        which is ALWAYS at the start of the text you get. A speech is the full statement of one person,
+        including any interruptions (e.g., questions or interjections by others and answers to questions).
 
         Return a numerical value in the range [-1, 1]:
 

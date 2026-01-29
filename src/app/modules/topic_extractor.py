@@ -32,9 +32,17 @@ class TopicExtractor(Step):
         speech = input_data.unwrap()
         chunks = speech["chunks"]
 
+        template_system_prompt = (
+            "Your task is to extract and return the main topic of the following speech in 1-3 words in German. "
+            "It can sometimes happen that you get multiple speeches. "
+            "Then you must only analyse the first speech, which is ALWAYS at the start of the text you get. "
+            "A speech is the full statement of one person, including any interruptions "
+            "(e.g., questions or interjections by others and answers to questions)."
+        )
+
         parser = JsonOutputParser(pydantic_object=TopicForRequest)
         prompt = PromptTemplate(
-            template="Return the main topic of the following text in 1-3 words in German."
+            template=template_system_prompt + "\n" +
             "{query}\n"
             "{previous_topics}\n"
             "{format_instruction}",
