@@ -4,7 +4,7 @@ import numpy as np
 from pipeline.pipeline.step import Step
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
 from pipeline.types.result import Ok, Result
-from sqlalchemy import literal, select
+from sqlalchemy import insert, literal, select
 
 from ..model.model import Topic
 from ..schema.schema import ClusterTopicsConfig
@@ -32,14 +32,15 @@ class ClusterTopicsGlobal(Step):
 
             distance = np.linalg.norm(closest_topic.embedding - emb.cpu().numpy()) if closest_topic else None
             if closest_topic is None or distance > self.config.eps:
-                new_topic = Topic(name=topic_name, embedding=emb.cpu())
-                self.session.add(new_topic)
+                stmt = insert(Topic).values(name=topic_name, embedding=emb.cpu()).returning(Topic.id)
+                result = await self.session.execute(stmt)
+                result2 = result.scalar_one()
                 if self.config.commit:
                     try:
                         await self.session.commit()
                     except Exception:
                         await self.session.rollback()
-                closest_topic = new_topic
+                closest_topic = Topic(id=result2, name=topic_name, embedding=emb.cpu())
 
             output_topics.append({
                 "topic_id": closest_topic.id,

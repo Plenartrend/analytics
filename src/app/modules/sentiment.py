@@ -2,7 +2,7 @@ from typing import Any
 
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from pipeline.pipeline.step import Step
 from pipeline.schemas.schema import PipelineModuleConfig, PipelineResponse
 from pipeline.types.result import Ok, Result
@@ -69,12 +69,11 @@ class Sentiment(Step):
             partial_variables={"format_instructions": parser.get_format_instructions()},
         )
 
-        llm = ChatOpenAI(
-            model="deepseek-chat",
-            openai_api_key=settings.DEEPSEEK_API_KEY,
-            openai_api_base="https://api.deepseek.com",
-            max_tokens=512,
-            temperature=0,
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash",
+            thinking_budget=2048,
+            google_api_key=settings.GEMINI_API_KEY,
+            temperature=0.1,
         )
 
         stance_list = []

@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     LOGGER_HTTP_ENABLE_LOGGING: bool = True
     LOGGER_HTTP_LOG_LEVEL: int = 30
 
-    DEEPSEEK_API_KEY: str
+    GEMINI_API_KEY: str
 
     PROCESS_START_DATE: str = "2020-08-01T00:00:00+00:00"
 
