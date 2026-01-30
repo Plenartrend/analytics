@@ -54,7 +54,7 @@ class SentimentClassifiedSpeech(ClassifiedSpeech):
 
 
 class SpeechSplitterConfig(Config):
-    chunk_size: int = 1000
+    chunk_size: int = 2500
     chunk_overlap: int = 200
 
 
