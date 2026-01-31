@@ -99,7 +99,7 @@ async def find_activites_stmt(key, length, settings) -> GenerativeSelect:
         )
     )
 
-    print(stmt)
+    print(stmt.compile(compile_kwargs={"literal_binds": True}))
     return stmt
 
 
@@ -187,7 +187,7 @@ class Podi:
 
                     if activity is None:
                         await transaction.commit()
-                        await asyncio.sleep(0.3)
+                        await asyncio.sleep(1)
 
                     elif activity.document_type == "printedPaper":
                         stmt = select(Activity).where(Activity.printed_paper_id == activity.printed_paper_id)
@@ -243,6 +243,8 @@ class Podi:
 
                                 await asyncio.gather(*promises)
 
+                        LOGGER.info("Cycle complete, checking for new activities...")
+
                     elif activity.document_type == "protocol":
                         stmt = (
                             insert(ActivityLatch)
@@ -283,10 +285,10 @@ class Podi:
                             async with db.begin():
                                 stmt = delete(ActivityLatch).where(ActivityLatch.activity_id == activity_id)
                                 await db.execute(stmt)
+
+                        LOGGER.info("Cycle complete, checking for new activities...")
                     else:
                         await transaction.commit()
-
-                LOGGER.info("Cycle complete, checking for new activities...")
 
             except Exception as e:
                 if isinstance(e, _KadiCloseException):
