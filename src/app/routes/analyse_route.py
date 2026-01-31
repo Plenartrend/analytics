@@ -36,6 +36,7 @@ async def analyse_printed_paper_event(protocol: PrintedPaper, session: AsyncSess
     except Exception as e:
         traceback.print_exc()
         LOGGER.error(f"Error during analysis of the docuemnt : {e}")
+        raise e
 
 
 @router.route("analyseProtocolEvent")
@@ -62,3 +63,4 @@ async def analyse_protocol_event(activity: BundestagProtocol, session: AsyncSess
     except Exception as e:
         traceback.print_exc()
         LOGGER.error(f"Error during analysis: {e}")
+        raise e
