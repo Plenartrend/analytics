@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1.20
 
-# Da github action schelcht ist, darf ich jetzt uv manuel installieren
 FROM python:3.13-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
@@ -15,7 +14,6 @@ WORKDIR /app
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
-
 
 COPY pyproject.toml uv.lock ./
 
@@ -35,6 +33,8 @@ RUN \
     /app/.venv/lib/python*/site-packages/**/tests \
     /app/.venv/lib/python*/site-packages/**/__pycache__
 
+RUN chmod -R a+rX /app/.venv && chmod -R a+x /app/.venv/bin/*
+
 FROM python:3.13-slim AS runner
 
 RUN groupadd --system --gid 999 nonroot \
@@ -42,19 +42,26 @@ RUN groupadd --system --gid 999 nonroot \
 
 WORKDIR /app
 
-RUN mkdir logs
-RUN chown -R nonroot:nonroot logs
+RUN mkdir logs && chown -R nonroot:nonroot logs
 
-COPY --from=builder --chown=nonroot:nonroot  /app/.venv .venv
-RUN chmod -R +x .venv/bin/
+COPY --from=builder /app/.venv .venv
 COPY --chown=nonroot:nonroot packages/ packages/
 COPY --chown=nonroot:nonroot src/ src/
 
 COPY --chown=nonroot:nonroot alembic.ini .
 COPY --chown=nonroot:nonroot alembic/ alembic/
 
+RUN rm -f .venv/bin/python .venv/bin/python3 .venv/bin/python3.13 && \
+    ln -s /usr/local/bin/python .venv/bin/python && \
+    ln -s /usr/local/bin/python .venv/bin/python3 && \
+    ln -s /usr/local/bin/python .venv/bin/python3.13 && \
+    chmod -R a+rX .venv && \
+    chmod a+x .venv/bin/* && \
+    chown -R nonroot:nonroot .venv
+
 USER nonroot
 
 ENV PATH="/app/.venv/bin:$PATH"
+ENV VIRTUAL_ENV="/app/.venv"
 
 CMD ["sh", "-c", "alembic upgrade head && python -m src.app"]
