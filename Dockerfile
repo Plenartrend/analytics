@@ -54,6 +54,4 @@ USER nonroot
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-RUN python -m spacy download de_core_news_sm
-
-CMD ["sh", "-c", "alembic upgrade head && python -m src.app"]
+CMD ["sh", "-c", "python -m spacy download de_core_news_sm && alembic upgrade head && python -m src.app"]
