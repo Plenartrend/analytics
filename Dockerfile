@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.20
 
 # Da github action schelcht ist, darf ich jetzt uv manuel installieren
-FROM python:3.14-slim AS builder
+FROM python:3.13-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
@@ -24,6 +24,8 @@ COPY --parents packages/*/pyproject.toml .
 COPY --parents packages/*/README.md .
 
 RUN uv sync --frozen --no-dev --no-cache
+
+RUN python -m spacy download de_core_news_sm
 
 RUN \
   rm -rf \
@@ -51,6 +53,8 @@ COPY --chown=nonroot:nonroot alembic.ini .
 COPY --chown=nonroot:nonroot alembic/ alembic/
 
 USER nonroot
+
+
 
 ENV PATH="/app/.venv/bin:$PATH"
 

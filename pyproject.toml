@@ -2,7 +2,7 @@
 name = "analytics"
 version = "0.1.0"
 description = "This package contains the analytics module for data processing and analysis for plenartrend."
-requires-python = ">=3.14"
+requires-python = "==3.13"
 dependencies = [
     "sqlalchemy[asyncio]>=2.0.44",
     "asyncpg>=0.31.0",
@@ -24,6 +24,8 @@ dependencies = [
     "pgvector>=0.4.2",
     "nltk>=3.9.2",
     "langchain-google-genai>=4.2.0",
+    "spacy>=3.8.11",
+    "pip>=26.0",
 ]
 
 [dependency-groups]

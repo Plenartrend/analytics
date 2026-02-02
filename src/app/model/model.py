@@ -182,3 +182,29 @@ class PrintedPaperMapping(Base):
     topic_id = Column(Integer, nullable=True)
     sentiment_value = Column(Float, nullable=True)
     sentiment_reason = Column(Text, nullable=True)
+
+
+class Protocol(Base):
+    __tablename__ = "protocols"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+
+    title = Column(Text, nullable=False)
+    document_number = Column(Text, nullable=False)
+
+    publisher = Column(BodyEnum, nullable=True)
+
+    session_note = Column(Text)
+    url = Column(Text)
+    text = Column(Text)
+
+    election_period = Column(
+        Integer,
+        ForeignKey("plenartrend.election_periods.number"),
+        nullable=True,
+    )
+
+    date = Column(TIMESTAMP)
+    api_updated = Column(TIMESTAMP)
+    updated = Column(TIMESTAMP)
+    created = Column(TIMESTAMP)

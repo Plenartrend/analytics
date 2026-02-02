@@ -3,7 +3,7 @@ name = "pipeline"
 version = "0.1.0"
 description = "Mega tolles Framework für eine schöne Pipeline"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = "==3.13"
 dependencies = [
     "pydantic>=2.11.3",
 ]
