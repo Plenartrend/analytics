@@ -10,7 +10,7 @@ permissions:
 jobs:
   lint:
     runs-on:
-      ubuntu-latest
+      self-hosted
     # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
