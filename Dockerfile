@@ -25,7 +25,6 @@ COPY --parents packages/*/README.md .
 
 RUN uv sync --frozen --no-dev --no-cache
 
-# spaCy-Modell in der Builder-Stage herunterladen (als root, mit Netzwerkzugang)
 RUN ./.venv/bin/python -m spacy download de_core_news_sm
 
 RUN \
@@ -36,7 +35,7 @@ RUN \
     /app/.venv/lib/python*/site-packages/**/tests \
     /app/.venv/lib/python*/site-packages/**/__pycache__
 
-FROM python:3.14-slim AS runner
+FROM python:3.13-slim AS runner
 
 RUN groupadd --system --gid 999 nonroot \
  && useradd --system --gid 999 --uid 999 --create-home nonroot
@@ -47,6 +46,7 @@ RUN mkdir logs
 RUN chown -R nonroot:nonroot logs
 
 COPY --from=builder --chown=nonroot:nonroot  /app/.venv .venv
+RUN chmod -R +x .venv/bin/
 COPY --chown=nonroot:nonroot packages/ packages/
 COPY --chown=nonroot:nonroot src/ src/
 
